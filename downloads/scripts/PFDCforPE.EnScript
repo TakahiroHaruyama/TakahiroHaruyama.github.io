@@ -1,0 +1,526 @@
+/*
+  PFDCforPE
+  Copyright (C) 2010 Takahiro Haruyama, Internet Initiative Japan Inc.
+
+  The parsing function is based on PEvilCarver EnScript, written by tk_lane.
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or (at
+  your option) any later version.
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  General Public License for more details. 
+*/
+
+class MainClass {
+  bool limitByMin, limitByMax, limitByTime, limitByEntropy, export2LEF, includePacked;
+  long minSize, maxSize;
+  double entropyMatched, distance;
+  DateClass fromDate, toDate;
+  String path, lefName;
+
+  class MyDialog: DialogClass{
+
+    CheckBoxClass check_export2LEF, check_limitByMin, check_limitByMax, check_limitByTime, check_limitByEntropy, check_includePacked;
+    StringEditClass edit_lefName;
+    PathEditClass edit_path;
+    DateEditClass edit_fromDate, edit_toDate;
+    LongEditClass      edit_minSize, edit_maxSize;
+    DoubleEditClass edit_entropy, edit_distance;
+    //LogicalEvidenceFileClass _lef;
+    GroupBoxClass      g1, g2, g3, g4;
+
+  MyDialog(MainClass m):  
+    DialogClass(null, "P.F.D.C. Tool for PE Executables"),
+      // limit option by internal timestamp
+      g1(this, "Date Filtering", 10, 10, 290, 70, 0),      
+      check_limitByTime(this, "Check Internal Date", 20, 30, DEFAULT, DEFAULT, 0, m.limitByTime),
+      edit_fromDate(this, "From:", 20, 50, 120, DEFAULT, DateEditClass::AUTOHSCROLL, m.fromDate, DateEditClass::SHOWTIME),
+      edit_toDate(this, "To:", 160, 50, 120, DEFAULT, DateEditClass::AUTOHSCROLL, m.toDate, DateEditClass::SHOWTIME),      
+      // limit option by min/max size
+      g2(this, "Size Filtering", 10, 90, 290, 70, 0),      
+      check_limitByMin(this, "Limit by Min Size", 20, 110, DEFAULT, DEFAULT, 0, m.limitByMin),
+      edit_minSize(this, "Min (KB):", 20, 130, 100, DEFAULT, 0, m.minSize, 0, 1000000000, 0),
+      check_limitByMax(this, "Limit by Max Size", 140, 110, DEFAULT, DEFAULT, 0, m.limitByMax),
+      edit_maxSize(this, "Max (KB):", 140, 130, 100, DEFAULT, 0, m.maxSize, 0, 1000000000, 0),
+      // limit option by entropy value
+      g3(this, "Entropy Filtering", 10, 170, 290, 70, 0),            
+      check_limitByEntropy(this, "Carve Only Near-match Binaries", 20, 190, DEFAULT, DEFAULT, 0, m.limitByEntropy),
+      edit_entropy(this, "Entropy Value:", 20, 210, 100, DEFAULT, 0, m.entropyMatched, 0, 8, 0),
+      edit_distance(this, "Distance:", 140, 210, 50, DEFAULT, 0, m.distance, 0, 8, 0),
+      // detect packing
+      check_includePacked(this, "Include Packed Binaries without Filtering Conditions (Experimental)", 20, 250, DEFAULT, DEFAULT, 0, m.includePacked),
+      // export option in LEF format
+      g4(this, "Carving", 10, 270, 290, 90, 0),            
+      check_export2LEF(this, "Export to LEF", 20, 290, DEFAULT, DEFAULT, 0, m.export2LEF),
+      edit_lefName(this, "LEF Name:", 20, 310, 100, DEFAULT, 0, m.lefName, 20, 0),
+      edit_path(this, "Location:", 20, 330, 200, DEFAULT, 0, m.path, 0)
+        {          
+          edit_fromDate.Enable(false);
+          edit_toDate.Enable(false);
+          edit_minSize.Enable(false);
+          edit_maxSize.Enable(false);
+          edit_entropy.Enable(false);
+          edit_distance.Enable(false);
+          edit_lefName.Enable(false);
+          edit_path.Enable(false);
+          //check_includePacked.Enable(false);
+          //m.max_size_of_PE = 65;
+        }
+    virtual void CheckControls() {
+      if (check_limitByTime.GetValue()){
+        edit_fromDate.Enable(true);
+        edit_toDate.Enable(true);        
+      }
+      else {
+        edit_fromDate.Enable(false);
+        edit_toDate.Enable(false);        
+      }
+      if (check_limitByMin.GetValue()) 
+        edit_minSize.Enable(true);
+      else
+        edit_minSize.Enable(false);
+      if (check_limitByMax.GetValue()) 
+        edit_maxSize.Enable(true);
+      else
+        edit_maxSize.Enable(false);
+      if (check_limitByEntropy.GetValue()){
+        edit_entropy.Enable(true);
+        edit_distance.Enable(true);        
+      }
+      else {
+        edit_entropy.Enable(false);
+        edit_distance.Enable(false);        
+      }
+      if (check_export2LEF.GetValue()){
+        edit_lefName.Enable(true);
+        edit_path.Enable(true);        
+        //check_includePacked.Enable(true);
+      }
+      else {
+        edit_lefName.Enable(false);
+        edit_path.Enable(false);         
+        //check_includePacked.Enable(false);       
+      }
+    }
+  }
+
+  void StoreUpdate(uint props){
+    StorageClass storage("PFC_Storage", props);    
+    //storage.Value("",);
+    storage.Value("Check Internal Date", limitByTime);
+    storage.Value("From", fromDate);
+    storage.Value("To", toDate);
+    storage.Value("Limit by Min Size", limitByMin);
+    storage.Value("Min", minSize);
+    storage.Value("Limit By Max Size", limitByMax);
+    storage.Value("Max", maxSize);
+    storage.Value("Check Near-match", limitByEntropy);
+    storage.Value("Entropy Value", entropyMatched);
+    storage.Value("Distance", distance);
+    storage.Value("Export to LEF", export2LEF);
+    storage.Value("LEF Name", lefName);
+    storage.Value("Path", path);
+    storage.Value("Include Packed", includePacked);
+  }
+
+  void Main(CaseClass c) {
+
+    uint totalCount, excludedByTime, excludedBySize, excludedByEntropy, packedCount;
+
+    SystemClass::ClearConsole(1);
+    MyDialog dialogbox(this);  
+    if(!c){
+      SystemClass::Message(SystemClass::ICONSTOP, "Error", "You must have an open case");
+      return;
+    }
+
+    DateClass now;
+    String scriptStart;
+
+    StoreUpdate(0);
+    if(dialogbox.Execute() == SystemClass::OK){
+      now.Now();
+      scriptStart = now.GetString();
+      StoreUpdate(StorageClass::WRITE);
+ 
+      SearchClass search;  
+      long status_size;
+      LogicalEvidenceFileClass lef();
+      //lefName = "PFC_carved.L01";
+      if (!lef.Open(path + "\\" + lefName, 0)) {
+        Console.WriteLine("cannot open the specified LEF");
+        return;
+      }
+  
+      forall (EntryClass e in c.EntryRoot()){ 
+        if(e.IsSelected())
+          status_size = status_size+e.PhysicalSize();
+      }
+      SystemClass::StatusRange("Finding PE...", status_size);
+      minSize = minSize*1000;      
+      maxSize = maxSize*1000;      
+  
+      forall (EntryClass e in c.EntryRoot()) {
+        if(e.IsSelected()){
+          EntryFileClass file();
+          LocalFileClass out();
+          if(!limitByMax)
+            maxSize = e.PhysicalSize();
+
+          file.Open(e);
+          search = new SearchClass();
+          //Find the first test header for PE format
+          search.AddKeyword("MZ", KeywordClass::ANSI);
+          search.Create();
+          search.Find(file);
+ 
+          long lasthit;
+          forall(SearchClass::HitClass h in search.GetHits()){
+            long loc_of_PE;
+            String isPE;
+      
+            SystemClass::StatusInc(h.Offset()-lasthit);
+            lasthit=h.Offset();
+            //get the offset that is supposed to have an event value which will
+            //allow for reduction of false possitive on headers
+            file.Seek(h.Offset()+60);
+            loc_of_PE = file.ReadBinaryInt(4);
+            //Console.WriteLine(e.Name()+ " " + loc_of_PE);
+            //checking to see if hit is PE file
+            file.SetCodePage(CodePageClass::ANSI);
+            file.Seek(h.Offset()+loc_of_PE);
+            file.ReadString(isPE, 2);
+            if(isPE=="PE") {
+              Console.WriteLine("\nPE file starting at: " + h.Offset());
+              totalCount++;
+              bool included = true, packed = false;
+
+              DateClass date();
+              long num_of_sections, TimeDateStamp, Characteristics, MajorLinkerVersion, MinorLinkerVersion, SizeOfCode,
+                SizeOfInitializedData, SizeOfUnInitializedData, AddressOfEntryPoint, ImageBase, MajorSubsystemVersion, MinorSubsystemVersion,
+                SizeOfImage, Checksum, Subsystem, DllCharacteristics, DirectoryEntryExportRVA, DirectoryEntryExportsize, DirectoryEntryImportRVA,
+                DirectoryEntryImportsize, DirectoryEntryResourcesize, DirectoryEntryResourceRVA, DirectoryEntryExceptionRVA, DirectoryEntryExceptionsize,
+                DirectoryEntryCertificateRVA, DirectoryEntryCertificatesize, DirectoryEntryBaseReLocsize, DirectoryEntryBaseReLocRVA,
+                DirectoryEntryDebugsize, DirectoryEntryDebugRVA,  DirectoryEntryArchitechtureRVA,  DirectoryEntryArchitechturesize,
+                DirectoryEntryGlobalPointerRVA, DirectoryEntryGlobalPointersize, DirectoryEntryTLSRVA, DirectoryEntryTLSsize, DirectoryEntryLoadConfigRVA,
+                DirectoryEntryLoadConfigsize, DirectoryEntryBoundImportsize, DirectoryEntryBoundImportRVA, DirectoryEntryIATsize, DirectoryEntryIATRVA,
+                DirectoryEntryDelayImportRVA, DirectoryEntryDelayImportsize, DirectoryEntryCLIsize, DirectoryEntryCLIRVA, DirectoryEntryRVA, DirectoryEntrysize;
+
+              //get number of sections associated with file
+              file.Seek(h.Offset()+loc_of_PE+6);
+              num_of_sections=file.ReadBinaryInt(2);
+
+              //get the PE TimeDateStamp
+              file.Seek(h.Offset()+loc_of_PE+8);
+              TimeDateStamp=file.ReadBinaryInt(4);
+              date.SetUnix(TimeDateStamp);
+              // filter by date
+              if (limitByTime && ((date <= fromDate) || (toDate <= date))){
+                Console.WriteLine("filtered by timestamp");
+                excludedByTime++;
+                included = false;
+                //continue;
+              }                  
+
+              //get the PE Characteristics 
+              file.Seek(h.Offset()+loc_of_PE+22);
+              Characteristics=file.ReadBinaryInt(2);
+
+              //get the PE MajorLinkerVersion
+              file.Seek(h.Offset()+loc_of_PE+26);
+              MajorLinkerVersion=file.ReadBinaryInt(1);
+
+              //get the PE MinorLinkerVersion
+              file.Seek(h.Offset()+loc_of_PE+27);
+              MinorLinkerVersion=file.ReadBinaryInt(1);
+
+              //get the size of Code
+              file.Seek(h.Offset()+loc_of_PE+28);
+              SizeOfCode=file.ReadBinaryInt(4);
+
+              //get the size of initialized data
+              file.Seek(h.Offset()+loc_of_PE+32);
+              SizeOfInitializedData=file.ReadBinaryInt(4);
+
+              //get the size of uninitialized data
+              file.Seek(h.Offset()+loc_of_PE+36);
+              SizeOfUnInitializedData=file.ReadBinaryInt(4);
+
+              //get the address of entry point
+              file.Seek(h.Offset()+loc_of_PE+40);
+              AddressOfEntryPoint=file.ReadBinaryInt(4);
+
+              //get the image base
+              file.Seek(h.Offset()+loc_of_PE+52);
+              ImageBase=file.ReadBinaryInt(4);
+
+              //get the MajorSubSystemVersion
+              file.Seek(h.Offset()+loc_of_PE+68);
+              MajorSubsystemVersion=file.ReadBinaryInt(2);
+
+              //get the MinorSubSystemVersion
+              file.Seek(h.Offset()+loc_of_PE+70);
+              MinorSubsystemVersion=file.ReadBinaryInt(2);
+
+              //get the SizeOfImage
+              file.Seek(h.Offset()+loc_of_PE+80);
+              SizeOfImage=file.ReadBinaryInt(4);
+
+              //get the Checksum
+              file.Seek(h.Offset()+loc_of_PE+88);
+              Checksum=file.ReadBinaryInt(4);
+
+              //get the Subsystem
+              file.Seek(h.Offset()+loc_of_PE+92);
+              Subsystem=file.ReadBinaryInt(2);
+
+              //get the DllCharacteristics
+              file.Seek(h.Offset()+loc_of_PE+94);
+              DllCharacteristics=file.ReadBinaryInt(2);
+
+              //get Directory Entry Export size
+              file.Seek(h.Offset()+loc_of_PE+120);
+              DirectoryEntryExportsize=file.ReadBinaryInt(4);
+
+              //get Directory Entry Export RVA
+              file.Seek(h.Offset()+loc_of_PE+124);
+              DirectoryEntryExportRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry IMport RVA
+              file.Seek(h.Offset()+loc_of_PE+128);
+              DirectoryEntryImportRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry IMport size
+              file.Seek(h.Offset()+loc_of_PE+132);
+              DirectoryEntryImportsize=file.ReadBinaryInt(4);
+
+              //get Directory Entry Resource size
+              file.Seek(h.Offset()+loc_of_PE+140);
+              DirectoryEntryResourcesize=file.ReadBinaryInt(4);
+
+              //get Directory Entry Resource RVA
+              file.Seek(h.Offset()+loc_of_PE+136);
+              DirectoryEntryResourceRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry Exception RVA
+              file.Seek(h.Offset()+loc_of_PE+144);
+              DirectoryEntryExceptionRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry Exception size
+              file.Seek(h.Offset()+loc_of_PE+148);
+              DirectoryEntryExceptionsize=file.ReadBinaryInt(4);
+
+              //get Directory Entry Exception RVA
+              file.Seek(h.Offset()+loc_of_PE+152);
+              DirectoryEntryCertificateRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry Exception size
+              file.Seek(h.Offset()+loc_of_PE+156);
+              DirectoryEntryCertificatesize=file.ReadBinaryInt(4);
+
+              //get Directory Entry BaseReLoc RVA
+              file.Seek(h.Offset()+loc_of_PE+160);
+              DirectoryEntryBaseReLocRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry BaseReLoc size
+              file.Seek(h.Offset()+loc_of_PE+164);
+              DirectoryEntryBaseReLocsize=file.ReadBinaryInt(4);
+
+              //get Directory Entry Debug RVA
+              file.Seek(h.Offset()+loc_of_PE+168);
+              DirectoryEntryDebugRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry Debug size
+              file.Seek(h.Offset()+loc_of_PE+172);
+              DirectoryEntryDebugsize=file.ReadBinaryInt(4);
+
+              //get Directory Entry Architechture RVA
+              file.Seek(h.Offset()+loc_of_PE+176);
+              DirectoryEntryArchitechtureRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry Architechture size
+              file.Seek(h.Offset()+loc_of_PE+180);
+              DirectoryEntryArchitechturesize=file.ReadBinaryInt(4);
+
+              //get Directory Entry GlobalPointer RVA
+              file.Seek(h.Offset()+loc_of_PE+188);
+              DirectoryEntryGlobalPointerRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry GlobalPointer size
+              file.Seek(h.Offset()+loc_of_PE+188);
+              DirectoryEntryGlobalPointersize=file.ReadBinaryInt(4);
+
+              //get Directory Entry TLS Table RVA
+              file.Seek(h.Offset()+loc_of_PE+192);
+              DirectoryEntryTLSRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry TLS Table size
+              file.Seek(h.Offset()+loc_of_PE+196);
+              DirectoryEntryTLSsize=file.ReadBinaryInt(4);
+
+              //get Directory Entry LoadConfig Table RVA
+              file.Seek(h.Offset()+loc_of_PE+200);
+              DirectoryEntryLoadConfigRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry LoadConfig Table RVA
+              file.Seek(h.Offset()+loc_of_PE+204);
+              DirectoryEntryLoadConfigsize=file.ReadBinaryInt(4);
+
+              //get Directory Entry Bound Import Table RVA
+              file.Seek(h.Offset()+loc_of_PE+208);
+              DirectoryEntryBoundImportRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry Bound Import Table size
+              file.Seek(h.Offset()+loc_of_PE+212);
+              DirectoryEntryBoundImportsize=file.ReadBinaryInt(4);
+
+              //get Directory Entry IAT size
+              file.Seek(h.Offset()+loc_of_PE+220);
+              DirectoryEntryIATsize=file.ReadBinaryInt(4);
+
+              //get Directory Entry IAT RVA
+              file.Seek(h.Offset()+loc_of_PE+216);
+              DirectoryEntryIATRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry Delay Import size
+              file.Seek(h.Offset()+loc_of_PE+228);
+              DirectoryEntryDelayImportsize=file.ReadBinaryInt(4);
+
+              //get Directory Entry Delay Import size
+              file.Seek(h.Offset()+loc_of_PE+228);
+              DirectoryEntryDelayImportRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry CLI Header RVA
+              file.Seek(h.Offset()+loc_of_PE+232);
+              DirectoryEntryCLIRVA=file.ReadBinaryInt(4);
+
+              //get Directory Entry CLI Header RVA
+              file.Seek(h.Offset()+loc_of_PE+236);
+              DirectoryEntryCLIsize=file.ReadBinaryInt(4);
+
+              int size_of_PE_header=248, size_of_section=40, num_sec=0;
+              long loc_size_of_RawData, loc_size_of_PointerToRawData, size_of_RawData, size_of_PointerToRawData, size_of_PE,
+                sec_virutualsize, sec_pointertorawdata, sec_characteristics, sec_virutualaddress;
+              String sectionname;
+
+              //get the sections
+              for(int i=0; i< num_of_sections; i++) {
+                file.Seek(h.Offset()+loc_of_PE+size_of_PE_header+(40*i));
+                file.ReadString(sectionname,8);
+
+                // get virtual size of section
+                file.Seek(h.Offset()+loc_of_PE+size_of_PE_header+(40*i)+8);
+                sec_virutualsize=file.ReadBinaryInt(4);
+
+                // get virtual address of section
+                file.Seek(h.Offset()+loc_of_PE+size_of_PE_header+(40*i)+12);
+                sec_virutualaddress=file.ReadBinaryInt(4);
+
+                //get the raw size of the sections data
+                file.Seek(h.Offset()+loc_of_PE+size_of_PE_header+(40*i)+16);
+                size_of_RawData=file.ReadBinaryInt(4);
+
+                //get the pointer to the sections data
+                file.Seek(h.Offset()+loc_of_PE+size_of_PE_header+(40*i)+20);
+                sec_pointertorawdata=file.ReadBinaryInt(4);
+
+                //get the characteristics of the section
+                file.Seek(h.Offset()+loc_of_PE+size_of_PE_header+(40*i)+36);
+                sec_characteristics=file.ReadBinaryInt(4);
+
+                // detect packed binary
+                // Is 1st section writable and executable?
+                if ((num_sec == 0) && ((sec_characteristics & 0xa0000000) == 0xa0000000)) 
+                  packed = true;
+                // Are other sections executable?
+                else if ((num_sec != 0) && ((sec_characteristics & 0x20000000) == 0x20000000)) 
+                  packed = true;
+
+                num_sec++;
+              }
+
+              //get the size of the PE file, seek to last section and add pointer to raw data and size of raw data
+
+              //geting the size of raw data
+              loc_size_of_RawData = loc_of_PE + size_of_PE_header + (size_of_section*(num_of_sections-1) + 16);
+              file.Seek(h.Offset() + loc_size_of_RawData);
+              size_of_RawData = file.ReadBinaryInt(4);
+              //getting the pointer to raw data
+              loc_size_of_PointerToRawData = loc_of_PE + size_of_PE_header + (size_of_section*(num_of_sections-1) + 20);
+              file.Seek(h.Offset() + loc_size_of_PointerToRawData);
+              size_of_PointerToRawData = file.ReadBinaryInt(4);
+              size_of_PE = size_of_RawData + size_of_PointerToRawData;
+
+              //filter by size
+              if (limitByMin && (size_of_PE <= minSize)) {
+                Console.WriteLine("filtered by minSize");
+                excludedBySize++;
+                included = false;
+                //continue;
+              }                                  
+              else if (limitByMax && (size_of_PE >= maxSize)) {
+                Console.WriteLine("filtered by maxSize");
+                excludedBySize++;
+                included = false;
+                //continue;
+              }                                  
+
+              //calculate its entropy
+              EntropyClass entropy();
+              double ev;
+              if (entropy.Open()) {
+                file.Seek(h.Offset());
+                entropy.AddData(file, size_of_PE);
+                entropy.Close();
+                ev = entropy.GetEntropy();
+              }
+              //filter by entropy
+              if (limitByEntropy && ((ev <= (entropyMatched - distance)) || ((entropyMatched + distance) <= ev))) {                
+                Console.WriteLine("filtered by entropy");
+                excludedByEntropy++;
+                included = false;
+                //continue;                      
+              }
+
+              // count up packedCount
+              if (includePacked && packed) {
+                Console.WriteLine("detecting packed");
+                packedCount++;
+              }
+
+              // export to LEF
+              if(export2LEF && (included || (includePacked && packed))) {
+                file.Seek(h.Offset());
+                String entroStr(String::FormatDouble(ev, 16));
+                if (included && !packed){
+                  lef.AddFile(file, "Included\\" + entroStr + ".PE", null, null, HashClass::Null, 0, size_of_PE, null, null, LogicalEvidenceFileClass::FILECONTENTS | LogicalEvidenceFileClass::FILEHASH);
+                  Console.WriteLine("PE Written Out (Included)");                         
+                }
+                else if (!included && packed){
+                  lef.AddFile(file, "Packed\\" + entroStr + ".PE", null, null, HashClass::Null, 0, size_of_PE, null, null, LogicalEvidenceFileClass::FILECONTENTS | LogicalEvidenceFileClass::FILEHASH);
+                  Console.WriteLine("PE Written Out (Packed)");
+                }
+                else {
+                  lef.AddFile(file, "Included And Packed\\" + entroStr + ".PE", null, null, HashClass::Null, 0, size_of_PE, null, null, LogicalEvidenceFileClass::FILECONTENTS | LogicalEvidenceFileClass::FILEHASH);
+                  Console.WriteLine("PE Written Out (Included & Packed)");
+                }
+              }
+
+            } 
+          }
+        }
+      }
+
+      String scriptEnd;
+      now.Now();
+      scriptEnd = now.GetString();
+      Console.WriteLine("\nStart Date: " + scriptStart + "\nEnd Date  : " + scriptEnd);
+
+      Console.WriteLine("\nTotal: " + totalCount + ",  Excluded by Time: " + excludedByTime + ",  Excluded by Size: " + excludedBySize + ",  Excluded by Entropy: " + excludedByEntropy + ",  Packed: " + packedCount);
+    }
+  }
+}

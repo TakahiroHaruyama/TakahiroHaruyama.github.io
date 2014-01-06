@@ -1,23 +1,45 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
+        <loc>http://TakahiroHaruyama.github.io/blog/2014/01/05/some-old-stuffs/</loc>
+        <lastmod>2014-01-06T23:07:45+09:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            http://TakahiroHaruyama.github.io/blog/2014/01/07/64bit-big-size-ram-acquisition-problem/
+        </loc>
+        <lastmod>2014-01-06T12:42:32+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://TakahiroHaruyama.github.io/404.html</loc>
+        <lastmod>2013-12-17T15:17:12+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://TakahiroHaruyama.github.io/about/</loc>
+        <lastmod>2013-12-17T15:20:07+09:00</lastmod>
+    </url>
+    <url>
         <loc>http://TakahiroHaruyama.github.io/archives/</loc>
-        <lastmod>2013-12-05T01:33:01+09:00</lastmod>
+        <lastmod>2014-01-06T23:07:45+09:00</lastmod>
     </url>
     <url>
         <loc>http://TakahiroHaruyama.github.io/blog/archives/</loc>
-        <lastmod>2013-12-05T01:33:01+09:00</lastmod>
+        <lastmod>2014-01-06T23:07:45+09:00</lastmod>
+    </url>
+    <url>
+        <loc>http://TakahiroHaruyama.github.io/blog/</loc>
+        <lastmod>2014-01-06T23:07:45+09:00</lastmod>
     </url>
     <url>
         <loc>http://TakahiroHaruyama.github.io/</loc>
-        <lastmod>2013-12-05T01:33:01+09:00</lastmod>
+        <lastmod>2014-01-06T23:07:45+09:00</lastmod>
     </url>
     <url>
         <loc>http://TakahiroHaruyama.github.io/robots.txt</loc>
-        <lastmod>2013-12-03T19:03:55+09:00</lastmod>
+        <lastmod>2013-12-09T23:54:48+09:00</lastmod>
     </url>
     <url>
         <loc>http://TakahiroHaruyama.github.io/search.html</loc>
-        <lastmod>2013-12-05T01:33:01+09:00</lastmod>
+        <lastmod>2013-12-17T15:17:12+09:00</lastmod>
     </url>
 </urlset>

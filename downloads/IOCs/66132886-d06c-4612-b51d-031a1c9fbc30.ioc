@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<ioc xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" id="66132886-d06c-4612-b51d-031a1c9fbc30" last-modified="2013-09-09T03:51:21" xmlns="http://schemas.mandiant.com/2010/ioc">
+  <short_description>Poison Ivy</short_description>
+  <description>"thj@h" means code in receive bytes
+"cks=u" means socks protocol
+"6I*h&lt;8" means portion of Camellia sbox</description>
+  <authored_by>Takahiro Haruyama</authored_by>
+  <authored_date>2012-08-10T12:26:43</authored_date>
+  <links />
+  <definition>
+    <Indicator operator="OR" id="dc1c17da-d262-41ff-a4a9-d8c72e8b4125">
+      <Indicator operator="AND" id="41e6e9b7-8420-4689-a939-cf08d1f2809f">
+        <Indicator operator="AND" id="e41c7482-8c6e-4d92-893e-f40ed9e0a8e9">
+          <IndicatorItem id="51798520-9a72-4147-aa16-b56d8f24d73f" condition="is">
+            <Context document="ProcessItem" search="ProcessItem/name" type="mir" />
+            <Content type="string">IEXPLORE.EXE</Content>
+          </IndicatorItem>
+          <IndicatorItem id="fdfb3674-f0e8-43f7-a261-2981b5beed0e" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/arguments" type="mir" />
+            <Content type="string">-nohome</Content>
+          </IndicatorItem>
+          <Indicator operator="OR" id="f68e56a7-b844-4b89-9265-5100680b1391">
+            <IndicatorItem id="e433b5bd-047b-4348-8344-a97b564bc4bd" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">SOFTWARE\Microsoft\Windows\CurrentVersion\Run</Content>
+            </IndicatorItem>
+            <IndicatorItem id="53ed7542-42ff-4d97-ac32-debc600e17f8" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">Software\Microsoft\Active Setup\Installed Components\</Content>
+            </IndicatorItem>
+          </Indicator>
+        </Indicator>
+        <Indicator operator="OR" id="582bae69-d56e-4254-b52c-c7803d01a1bd">
+          <IndicatorItem id="4f0dc6a7-13cd-409e-9138-caf1d905d9d7" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/Protection" type="mir" />
+            <Content type="string">EXECUTE_READWRITE PrivateMemory MemCommit SecNoChange CopyOnWrite</Content>
+          </IndicatorItem>
+          <IndicatorItem id="6cdc5fd2-9487-4f6a-8d89-10d506d035f5" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/Protection" type="mir" />
+            <Content type="string">EXECUTE_READWRITE PrivateMemory MemCommit MultipleSecured</Content>
+          </IndicatorItem>
+        </Indicator>
+      </Indicator>
+      <Indicator operator="AND" id="45537b2f-0365-4a36-a898-0e84e4e7f759">
+        <IndicatorItem id="e3f38607-9143-4fc4-a661-9520b46ea75e" condition="is">
+          <Context document="ProcessItem" search="ProcessItem/name" type="mir" />
+          <Content type="string">Explorer.EXE</Content>
+        </IndicatorItem>
+        <Indicator operator="OR" id="e5bea0df-df48-4636-acc6-7770d8d495ff">
+          <IndicatorItem id="df528795-3af3-47f7-b6a0-285fdaa93f54" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/Protection" type="mir" />
+            <Content type="string">EXECUTE_READWRITE PrivateMemory MemCommit SecNoChange CopyOnWrite</Content>
+          </IndicatorItem>
+          <IndicatorItem id="a5830f33-c46e-4afc-afb8-3f46e5ced5d2" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/Protection" type="mir" />
+            <Content type="string">EXECUTE_READWRITE PrivateMemory MemCommit MultipleSecured</Content>
+          </IndicatorItem>
+        </Indicator>
+        <Indicator operator="AND" id="a3e2e51f-d0d5-4330-9a85-7b034b2dfe11">
+          <IndicatorItem id="d53fa502-f2aa-4058-85f7-0e55fdaff5a7" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+            <Content type="string">CONNECT %s:%i HTTP/1.0</Content>
+          </IndicatorItem>
+          <IndicatorItem id="a0dea006-6b79-48c2-a3d2-856a0b496299" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+            <Content type="string">?503</Content>
+          </IndicatorItem>
+        </Indicator>
+      </Indicator>
+      <Indicator operator="AND" id="f883efe6-6574-4860-86d8-15b69b315ca0">
+        <IndicatorItem id="e5acb4f5-8cee-4069-91a7-3c8214dd934b" condition="contains">
+          <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+          <Content type="string">thj@h</Content>
+        </IndicatorItem>
+        <IndicatorItem id="40ec3500-bd33-4c81-9380-fb2bd4684f37" condition="contains">
+          <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+          <Content type="string">cks=u</Content>
+        </IndicatorItem>
+        <IndicatorItem id="0ef897ef-e92e-4380-b024-b4c6440ab38e" condition="contains">
+          <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+          <Content type="string">6I*h&lt;8</Content>
+        </IndicatorItem>
+      </Indicator>
+    </Indicator>
+  </definition>
+</ioc>

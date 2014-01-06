@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<ioc xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" id="c229d84e-3981-4c71-a16f-aa6a17b22c75" last-modified="2013-12-06T06:57:43" xmlns="http://schemas.mandiant.com/2010/ioc">
+  <short_description>ZeuS 2.x</short_description>
+  <description>ZeuS 2.x Variants IOC including variants (e.g., Citadel)</description>
+  <authored_by>Takahiro Haruyama</authored_by>
+  <authored_date>2012-07-12T07:59:38</authored_date>
+  <links />
+  <definition>
+    <Indicator operator="OR" id="60c51989-e7f4-4f0b-aced-11da9f8b7375">
+      <Indicator operator="AND" id="3fe1bbf8-9e34-4050-8081-8900552615a6">
+        <IndicatorItem id="8be1fab7-94e8-401c-b293-54a36247ac60" condition="contains">
+          <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+          <Content type="string">DAVE</Content>
+        </IndicatorItem>
+        <Indicator operator="OR" id="acaf9177-bf8c-45d4-8eb8-315a75497ac9">
+          <IndicatorItem id="4c1d27eb-a19a-4e2c-900c-7de8139c8a26" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/Injected" type="mir" />
+            <Content type="string">True</Content>
+          </IndicatorItem>
+          <Indicator operator="AND" id="cae6594b-1300-47a2-8bdb-82460949404f">
+            <IndicatorItem id="6d99b18e-86e7-4e62-93b6-f247784c7469" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">GetLengthSid</Content>
+            </IndicatorItem>
+            <IndicatorItem id="9000eaf6-61ae-42c4-b1d5-fcce5c297b98" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">SetFileTime</Content>
+            </IndicatorItem>
+            <IndicatorItem id="689156e5-72f9-4c26-bfe1-46664f625aef" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">CreateToolhelp32Snapshot</Content>
+            </IndicatorItem>
+            <IndicatorItem id="d96b5c98-a246-45e3-9868-c95eb0425f22" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">WriteProcessMemory</Content>
+            </IndicatorItem>
+            <IndicatorItem id="bbcd1006-009f-4fbc-a51a-bed7dca04472" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">CreateRemoteThread</Content>
+            </IndicatorItem>
+            <IndicatorItem id="cc4dbb23-2fa7-4c7c-91c1-7bd93b51616e" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">HttpSendRequestW</Content>
+            </IndicatorItem>
+            <IndicatorItem id="82e5e3f5-49f7-4c93-933d-e60fb3f4ac29" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">HttpSendRequestExW</Content>
+            </IndicatorItem>
+            <IndicatorItem id="f53a2627-f11a-4b70-9c36-94ec9532b745" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">HttpSendRequestA</Content>
+            </IndicatorItem>
+            <IndicatorItem id="ef483784-6478-4272-ba5a-6e312b767da9" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">HttpSendRequestExA</Content>
+            </IndicatorItem>
+          </Indicator>
+        </Indicator>
+        <Indicator operator="OR" id="5571032c-d51a-41bd-aa49-746eea694146">
+          <Indicator operator="OR" id="2427af17-3088-4308-bd99-214d23407583">
+            <IndicatorItem id="6aa75f6a-dcc3-4dfc-b103-4c2eb428e8d8" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">ZCID:</Content>
+            </IndicatorItem>
+            <IndicatorItem id="9482ed48-07da-45f0-a7d4-edaad4ced17f" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">*@*.txt</Content>
+            </IndicatorItem>
+            <IndicatorItem id="d7d0bbc6-d1ee-49ba-85c7-2190f8bd8631" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">if exist "%s" goto d</Content>
+            </IndicatorItem>
+            <IndicatorItem id="a6483267-64ac-431b-bb16-72ec055c0d1b" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">rd /S /Q "%s"</Content>
+            </IndicatorItem>
+            <IndicatorItem id="4775a7de-db37-4997-a034-200bee81c40a" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">bot_update</Content>
+            </IndicatorItem>
+            <IndicatorItem id="ec842694-8636-420e-b292-35919be2a03d" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">os_shutdown</Content>
+            </IndicatorItem>
+            <IndicatorItem id="80332dfc-d250-4cc7-8e8d-30a946cb1da8" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">grabbed\%S_%02u_%02u_%02u.txt</Content>
+            </IndicatorItem>
+            <IndicatorItem id="eb47667c-2562-4f7a-af07-4ceb4eb5ab72" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">ftp://%S:%S@%S:%u</Content>
+            </IndicatorItem>
+            <IndicatorItem id="a380505e-a5c5-4083-8850-ba3811db3703" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">*ghisler*</Content>
+            </IndicatorItem>
+          </Indicator>
+          <Indicator operator="OR" id="095ba9d6-e440-4bae-9b74-9e48e72b3701">
+            <IndicatorItem id="a84c3851-435a-4665-b617-f30d02b0c3a1" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">user_activate_imodule</Content>
+            </IndicatorItem>
+            <IndicatorItem id="52f8d6eb-0f6d-4424-806a-ebe6dd30f793" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">user_restart_imodule</Content>
+            </IndicatorItem>
+            <IndicatorItem id="21aead4f-3a90-4d0d-b9c9-51d484dd7bfa" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">oemfpc.dat</Content>
+            </IndicatorItem>
+          </Indicator>
+          <Indicator operator="AND" id="767eb343-0df5-41f0-a1da-475cc5662738">
+            <IndicatorItem id="d6aaeefd-82a8-4fd0-b101-6a16b9edba48" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">GetKeyboardLayoutList</Content>
+            </IndicatorItem>
+            <Indicator operator="OR" id="725ab50b-a546-4ace-82df-ec50b058e2bf">
+              <IndicatorItem id="fb2f1565-4de6-4f30-a122-7731f26b4367" condition="contains">
+                <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+                <Content type="string">geswall</Content>
+              </IndicatorItem>
+              <IndicatorItem id="4b40e499-b950-4c94-8893-7c41ff2465a4" condition="contains">
+                <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+                <Content type="string">safespace</Content>
+              </IndicatorItem>
+              <IndicatorItem id="0fdd0319-2d1e-4192-80cd-cfdb9e923fd5" condition="contains">
+                <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+                <Content type="string">bufferzone</Content>
+              </IndicatorItem>
+              <IndicatorItem id="4ae69808-aa78-4687-92d4-c800663ad5cb" condition="contains">
+                <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+                <Content type="string">virtualbox</Content>
+              </IndicatorItem>
+              <IndicatorItem id="ae3d7bb3-9b7f-4f1c-91b0-9a154de30272" condition="contains">
+                <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+                <Content type="string">Coded by BRIAN KREBS for personal use only</Content>
+              </IndicatorItem>
+            </Indicator>
+          </Indicator>
+        </Indicator>
+      </Indicator>
+    </Indicator>
+  </definition>
+</ioc>

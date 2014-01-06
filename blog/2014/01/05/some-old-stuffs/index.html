@@ -5,13 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Blog Archive - CCI</title>
+  <title>Some Old Stuffs - CCI</title>
   <meta name="author" content="Takahiro Haruyama (@cci_forensics)">
 
   
-  <meta name="description" content="Blog Archive 2014 64bit big sized RAM Image Acquisition Problem
-Jan 07 2014 posted in Forensics Some Old Stuffs
-Jan 05 2014 posted in Forensics, &hellip;">
+  <meta name="description" content="IOCs for memory forensics Never forget to configure &ldquo;advanced parameters&rdquo; (check String and the length is 4) ZeroAccess for kernel/user- &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +18,7 @@ Jan 05 2014 posted in Forensics, &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://TakahiroHaruyama.github.io/blog/archives">
+  <link rel="canonical" href="http://TakahiroHaruyama.github.io/blog/2014/01/05/some-old-stuffs">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="CCI" type="application/atom+xml">
@@ -96,49 +94,133 @@ Jan 05 2014 posted in Forensics, &hellip;">
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Blog Archive</h1>
+    
+      <h1 class="entry-title">Some Old Stuffs</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-05T23:37:20+09:00" pubdate data-updated="true">Jan 5<span>th</span>, 2014</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives">
 
 
+<div class="entry-content"><h3>IOCs for memory forensics</h3>
 
-  
-  <h2>2014</h2>
+<p>Never forget to configure &ldquo;advanced parameters&rdquo; (check String and the length is 4)</p>
 
-<article>
-  
-<h1><a href="/blog/2014/01/07/64bit-big-size-ram-acquisition-problem/">64bit big sized RAM Image Acquisition Problem</a></h1>
-<time datetime="2014-01-07T22:15:39+09:00" pubdate><span class='month'>Jan</span> <span class='day'>07</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/forensics/'>Forensics</a></span>
-</footer>
+<ul>
+<li><a href="/downloads/IOCs/23592725-e7cb-4391-9148-2ce25b1ed00d.ioc">ZeroAccess</a> for kernel/user-mode variants</li>
+<li><a href="/downloads/IOCs/66132886-d06c-4612-b51d-031a1c9fbc30.ioc">Poison Ivy</a></li>
+<li><a href="/downloads/IOCs/c229d84e-3981-4c71-a16f-aa6a17b22c75.ioc">Zeus 2.x variants</a> including Citadel</li>
+<li><a href="/downloads/IOCs/42392189-6ef8-4869-bb2e-b457c3e05ba1.ioc">SpyEye 1.3.x</a></li>
+</ul>
 
 
-</article>
+<h3>IDAPython script</h3>
+
+<ul>
+<li><a href="/downloads/scripts/Deobfuscating_SpyEye.zip">Deobfuscating_SpyEye</a> deobfuscate 4-byte hash values and strings</li>
+<li><a href="/downloads/scripts/zeus_string_decoder.py">zeus_string_decoder</a> decode strings in ZeuS binary</li>
+<li><a href="/downloads/scripts/fix_junk_pony.py">fix_junk_pony</a> modify PONY&rsquo;s junk code</li>
+</ul>
 
 
+<h3>Immunity Debugger script</h3>
 
-<article>
-  
-<h1><a href="/blog/2014/01/05/some-old-stuffs/">Some Old Stuffs</a></h1>
-<time datetime="2014-01-05T23:37:20+09:00" pubdate><span class='month'>Jan</span> <span class='day'>05</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/forensics/'>Forensics</a>, <a class='category' href='/blog/categories/malware/'>Malware</a></span>
-</footer>
+<ul>
+<li><a href="/downloads/scripts/immbone_nx.zip">immbone_nx</a> break on execute script on DEP environment (enable DEP and uncheck the option ignoring Memory access violation in the debugger settings)</li>
+<li><a href="/downloads/scripts/immbone.zip">immbone</a> break on execute script on non-DEP environment (disable DEP and uncheck the option ignoring single-step break in the debugger settings)</li>
+<li><a href="/downloads/scripts/blackmanta.py">blackmanta</a> slightly-changed version for Immunity Debugger v1.8</li>
+</ul>
 
 
-</article>
+<h3>EnCase EnScript</h3>
+
+<ul>
+<li><a href="/downloads/scripts/CrashDumpAnalyzer_20110322.zip">CrashDumpAnalyzer</a> memory forensic EnScripts for MS crash dump</li>
+<li><a href="/downloads/scripts/RawImageAnalyzer_20110322.zip">RawImageAnalyzer</a> memory forensic EnScripts for raw memory dump</li>
+<li><a href="/downloads/scripts/Timeline_Report_v1.8.1_CCI_20120511.zip">Timeline_Report_v1.8.1_CCI</a> NTFS SI/FN timeline EnScript based on Geoff Black&rsquo;s timeline EnScript</li>
+<li><a href="/downloads/scripts/PFDCforPE.EnScript">PFDCforPE</a> parse/filter/detect/carve PE files</li>
+</ul>
+
+
+<h3>Others</h3>
+
+<ul>
+<li><a href="/downloads/scripts/amf_7x86.c">amf_7x86</a> PoC driver for anti memory forensics on Windows7</li>
+<li><a href="/downloads/scripts/amf_XPx86.c">amf_XPx86</a> PoC driver for anti memory forensics on WindowsXP</li>
+</ul>
+
+
+<!-- * [](downloads/scripts/) -->
 
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Takahiro Haruyama (@cci_forensics)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-05T23:37:20+09:00" pubdate data-updated="true">Jan 5<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/forensics/'>Forensics</a>, <a class='category' href='/blog/categories/malware/'>Malware</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://TakahiroHaruyama.github.io/blog/2014/01/05/some-old-stuffs/" data-via="cci_forensics" data-counturl="http://TakahiroHaruyama.github.io/blog/2014/01/05/some-old-stuffs/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/01/07/64bit-big-size-ram-acquisition-problem/" title="Next Post: 64bit big sized RAM Image Acquisition Problem">64bit big sized RAM Image Acquisition Problem &raquo;</a>
+      
+    </p>
+  </footer>
 </article>
 
 </div>

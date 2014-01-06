@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<ioc xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" id="23592725-e7cb-4391-9148-2ce25b1ed00d" last-modified="2013-08-21T05:03:27" xmlns="http://schemas.mandiant.com/2010/ioc">
+  <short_description>ZeroAccess</short_description>
+  <authored_by>Takahiro Haruyama</authored_by>
+  <authored_date>2013-04-25T02:33:27</authored_date>
+  <links />
+  <definition>
+    <Indicator operator="OR" id="c1dbeeaa-46fd-4154-8345-2ba38d9fa794">
+      <IndicatorItem id="1f7ef8de-91e9-4e5f-ac39-8dc1e2faf6ed" condition="contains">
+        <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+        <Content type="string">ACPI#PNP0303#2&amp;da1a3ff&amp;0</Content>
+      </IndicatorItem>
+      <Indicator operator="OR" id="0d6da100-4029-48fe-b49f-2dd39726dc63">
+        <Indicator operator="AND" id="bd8dacfc-7d19-4792-b96d-6060853bf9f0">
+          <IndicatorItem id="c4c1b56a-f236-43df-b18d-6ebe57884dd6" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+            <Content type="string">2ptf</Content>
+          </IndicatorItem>
+          <Indicator operator="AND" id="19fdd293-dfcd-4a96-9565-394253d8e55d">
+            <IndicatorItem id="4ded52bc-8982-4bb2-9e0a-937e4c105d19" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">cnct</Content>
+            </IndicatorItem>
+            <IndicatorItem id="5b1e656b-7f6c-4750-88f8-3048791c2d7f" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">send</Content>
+            </IndicatorItem>
+            <IndicatorItem id="ec47e74d-1cbf-4bb4-a502-320211654017" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">recv</Content>
+            </IndicatorItem>
+            <IndicatorItem id="fd2d3056-6ae4-4fb0-a379-8d1b1a04002c" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">disc</Content>
+            </IndicatorItem>
+          </Indicator>
+          <Indicator operator="AND" id="e6d4af9f-377c-4677-9fde-d976442f3f2b">
+            <IndicatorItem id="78ffa0a0-2dde-421f-8815-4ed6bcddda56" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">Lteg</Content>
+            </IndicatorItem>
+            <IndicatorItem id="1399cfa4-b24a-43a4-a884-0256ee54ffc2" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">Lter</Content>
+            </IndicatorItem>
+          </Indicator>
+        </Indicator>
+        <Indicator operator="AND" id="9cf82504-5405-40a9-b262-4587c193fd4c">
+          <IndicatorItem id="582220a8-9233-4fa2-9ed9-888c28c666eb" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+            <Content type="string">\$%08x%04x%04x%02x%02x%02x%02x%02x%02x%02x%02x\</Content>
+          </IndicatorItem>
+          <IndicatorItem id="a162d65f-5774-4c9d-b014-0d4badd508ca" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+            <Content type="string">\??\%sU</Content>
+          </IndicatorItem>
+          <IndicatorItem id="b4829de6-7cac-4811-a899-5f31c267adb2" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+            <Content type="string">\??\%s@</Content>
+          </IndicatorItem>
+          <IndicatorItem id="481a43e5-7b48-472e-b41e-65102f768c6d" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+            <Content type="string">%sU\%08x.@</Content>
+          </IndicatorItem>
+        </Indicator>
+        <Indicator operator="AND" id="5bb72f8c-5a4a-405c-842d-7b3d14725395">
+          <Indicator operator="AND" id="99d88ea6-caa4-469c-b020-4c60645d7225">
+            <IndicatorItem id="f5c00e0c-4fe9-4626-b1ff-98a9d41f495e" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">CryptAcquireContextW</Content>
+            </IndicatorItem>
+            <IndicatorItem id="3f127fb2-8de5-40e1-9e05-41b6420b66b7" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">CryptImportKey</Content>
+            </IndicatorItem>
+            <IndicatorItem id="ee24ae6d-e010-4878-b897-a064a670ad5c" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">CryptGenRandom</Content>
+            </IndicatorItem>
+            <IndicatorItem id="d3b9c82c-6a97-40a0-b43b-434f92f4c551" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">CryptVerifySignatureW</Content>
+            </IndicatorItem>
+          </Indicator>
+          <Indicator operator="AND" id="9be18d4b-4f47-4d5b-a4b8-848a7e837540">
+            <IndicatorItem id="e9d44f80-50ea-4b8e-8826-9edf9c1b8f3e" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">LdrGetProcedureAddress</Content>
+            </IndicatorItem>
+            <IndicatorItem id="222c1d16-4f00-4922-8661-b34cf34fddfd" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">LdrProcessRelocationBlock</Content>
+            </IndicatorItem>
+          </Indicator>
+          <Indicator operator="AND" id="7047fc34-c893-4ee4-8b85-05463bca3fa2">
+            <IndicatorItem id="830e3863-0e0f-4658-8504-f5f95e230376" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">ZwQueryVolumeInformationFile</Content>
+            </IndicatorItem>
+            <IndicatorItem id="cf031fa0-3d65-4f6c-88d1-9e31e9d46a7c" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">ZwQueryDirectoryFile</Content>
+            </IndicatorItem>
+            <IndicatorItem id="de93f61f-5852-4d53-852d-90d78ebe6180" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">ZwQueryEaFile</Content>
+            </IndicatorItem>
+            <IndicatorItem id="6f5a6744-f207-46cb-a1a6-dba14fd7d315" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">RtlImageNtHeader</Content>
+            </IndicatorItem>
+            <IndicatorItem id="54277827-ce17-4b1b-ad5f-c4971b40ae5f" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">RtlImageDirectoryEntryToData</Content>
+            </IndicatorItem>
+            <IndicatorItem id="01dc1dbf-63e5-423f-bc2e-02e60ad3d8eb" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">RtlAddressInSectionTable</Content>
+            </IndicatorItem>
+            <IndicatorItem id="f78b297a-5f6a-4261-836b-3d00b75cf583" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">BindIoCompletionCallback</Content>
+            </IndicatorItem>
+            <IndicatorItem id="0ec0a839-b3b1-4891-bb60-d9fb1b11a85e" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">RtlComputeCrc32</Content>
+            </IndicatorItem>
+            <IndicatorItem id="05b69cd9-b85e-40df-968f-22ec69d1ec42" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">RtlTimeToSecondsSince1980</Content>
+            </IndicatorItem>
+          </Indicator>
+        </Indicator>
+      </Indicator>
+      <Indicator operator="AND" id="1f8f0a79-5dee-41e5-8e54-6a2ecfd3c558">
+        <Indicator operator="AND" id="a6530970-a40c-4ce0-8a03-196a17df523f">
+          <IndicatorItem id="4a358708-ab86-403a-9275-31d8a4f95270" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">BindIoCompletionCallback</Content>
+          </IndicatorItem>
+          <IndicatorItem id="86021e3b-55ee-4eec-8f8c-2e36b766728f" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwQueryInformationProcess</Content>
+          </IndicatorItem>
+          <IndicatorItem id="8dbd944c-ab92-4964-8cd3-3218c85ce65e" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwQueryVolumeInformationFile</Content>
+          </IndicatorItem>
+          <IndicatorItem id="43de222c-6087-43ee-8d8d-0f94e1985f76" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">RtlComputeCrc32</Content>
+          </IndicatorItem>
+          <IndicatorItem id="eebe1cdd-f385-4a26-852f-af97148e1a9c" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">RtlTimeToSecondsSince1980</Content>
+          </IndicatorItem>
+          <IndicatorItem id="3c7b6e8f-01c6-4942-a468-78cb77051e97" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwQueryInformationToken</Content>
+          </IndicatorItem>
+          <IndicatorItem id="a8b9df2b-bd9e-4145-bc30-155f857fddef" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwCreateKey</Content>
+          </IndicatorItem>
+          <IndicatorItem id="646132da-55f6-43dd-80fe-ff90d62f265d" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwSetValueKey</Content>
+          </IndicatorItem>
+        </Indicator>
+        <Indicator operator="AND" id="04e6c40b-7683-4aaf-b78a-8807f71816cb">
+          <IndicatorItem id="2865f544-3d75-4484-9bc3-a49dec7c1c8a" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+            <Content type="string">msimg32.dll</Content>
+          </IndicatorItem>
+          <IndicatorItem id="544f5af4-43c0-4f98-b0b5-0cd8df6c7166" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+            <Content type="string">runas</Content>
+          </IndicatorItem>
+          <IndicatorItem id="b488dbf7-18f3-4a9f-8e58-d444b1a793f1" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">RtlAdjustPrivilege</Content>
+          </IndicatorItem>
+          <IndicatorItem id="c3b3571d-0909-43fb-b3a4-b1b8eb727cbe" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwOpenThreadTokenEx</Content>
+          </IndicatorItem>
+          <IndicatorItem id="983cbed8-ceb9-48e4-bf33-64d006cf6607" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwAdjustPrivilegesToken</Content>
+          </IndicatorItem>
+        </Indicator>
+        <Indicator operator="AND" id="d8d8c7b8-9814-455e-b41a-e6ccb7582f23">
+          <IndicatorItem id="4a37b4fd-7011-4175-b89b-34d7ac136e7a" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+            <Content type="string">MSCF</Content>
+          </IndicatorItem>
+        </Indicator>
+        <Indicator operator="OR" id="8414636f-f7d6-42fe-aa33-d6d920411338">
+          <Indicator operator="AND" id="875b814f-bdd4-4368-8032-ea59c995dbb1">
+            <IndicatorItem id="30e64071-317d-4103-94e6-d520fd3aa9d7" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">MpCmdRun.exe</Content>
+            </IndicatorItem>
+            <IndicatorItem id="a48c0aa4-7bca-4b61-b920-a30e96f794e6" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">msseces.exe</Content>
+            </IndicatorItem>
+            <IndicatorItem id="bba5a95b-fa76-4ac1-8231-1641c60c403c" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">NisSrv.exe</Content>
+            </IndicatorItem>
+            <IndicatorItem id="48300a9c-1944-41dd-8d93-96ac8cc21636" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">MSASCui.exe</Content>
+            </IndicatorItem>
+            <IndicatorItem id="27807566-e710-4e29-8ad1-c95d25cfc318" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">wscntfy.exe</Content>
+            </IndicatorItem>
+          </Indicator>
+          <Indicator operator="AND" id="f03c51e7-777d-4ab4-9677-7ef61c3ad200">
+            <IndicatorItem id="01e45ff5-c193-40a7-b2b4-140e8c1a69e5" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">ZwDeleteValueKey</Content>
+            </IndicatorItem>
+            <IndicatorItem id="44af1332-4a84-4a31-9d68-64488b3809fd" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">ChangeServiceConfigW</Content>
+            </IndicatorItem>
+            <IndicatorItem id="3435f96f-9bff-4123-953a-0308681afc63" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">DeleteService</Content>
+            </IndicatorItem>
+            <IndicatorItem id="02d1ee20-048a-4a57-bc77-b3603aafbd6d" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">{FD6905CE-952F-41F1-9A6F-135D9C6622CC}</Content>
+            </IndicatorItem>
+            <IndicatorItem id="d868c05c-6449-4fd4-baa8-d4bf27a200c8" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">{F56F6FDD-AA9D-4618-A949-C1B91AF43B1A}</Content>
+            </IndicatorItem>
+            <IndicatorItem id="9c4d7c9b-bf68-4b64-8167-95705633f9da" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">MsMpSvc</Content>
+            </IndicatorItem>
+            <IndicatorItem id="36119ce6-6970-4887-8577-47aa23ac51f3" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">windefend</Content>
+            </IndicatorItem>
+            <IndicatorItem id="5dcd165a-c644-4fad-9e7e-ca1219667096" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">SharedAccess</Content>
+            </IndicatorItem>
+            <IndicatorItem id="821b9e90-bd4c-44c0-994d-04b1628b7fc2" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">iphlpsvc</Content>
+            </IndicatorItem>
+            <IndicatorItem id="3406586f-6f61-479e-ab2b-a31b04ca5042" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">wscsvc</Content>
+            </IndicatorItem>
+            <IndicatorItem id="e48c8f66-3567-4e1d-a9df-50965f999cc6" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+              <Content type="string">mpssvc</Content>
+            </IndicatorItem>
+          </Indicator>
+          <Indicator operator="AND" id="a4564800-c527-4128-b105-42cb6f556c12">
+            <IndicatorItem id="15c93d61-2693-46d2-ba35-5c3b8aa8289f" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">ZwResumeThread</Content>
+            </IndicatorItem>
+            <IndicatorItem id="cc39a8df-15a5-49b7-b248-4dc2555ab18b" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">ZwGetContextThread</Content>
+            </IndicatorItem>
+            <IndicatorItem id="f2c3c0f0-e2ff-41b9-817b-d916b951b5fa" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">ZwSetInformationFile</Content>
+            </IndicatorItem>
+            <IndicatorItem id="263ce763-54ff-4f18-9646-8fb4abf57e4e" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">ZwSetContextThread</Content>
+            </IndicatorItem>
+            <IndicatorItem id="72b6b4c5-9bbc-45d3-b96e-1ce0fbbc368d" condition="contains">
+              <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+              <Content type="string">ZwDuplicateObject</Content>
+            </IndicatorItem>
+          </Indicator>
+        </Indicator>
+      </Indicator>
+      <Indicator operator="AND" id="47dcf77c-00ba-422f-94de-321e87fa0c02">
+        <IndicatorItem id="a04c5e6a-f8ff-4271-b1aa-7bb6f7cdc867" condition="is">
+          <Context document="DriverItem" search="DriverItem/ImageSize" type="mir" />
+          <Content type="int">0</Content>
+        </IndicatorItem>
+        <Indicator operator="AND" id="ad1c341a-ff4a-4ba7-87fa-eb6f707be730">
+          <IndicatorItem id="f45ced13-7cd2-48b1-b57b-9ae73b1a7c74" condition="contains">
+            <Context document="DriverItem" search="DriverItem/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">RtlHashUnicodeString</Content>
+          </IndicatorItem>
+          <IndicatorItem id="43985573-e82f-41a6-9165-0a57a7925631" condition="contains">
+            <Context document="DriverItem" search="DriverItem/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">IoRegisterShutdownNotification</Content>
+          </IndicatorItem>
+          <IndicatorItem id="c7d9e584-499a-4e9b-aa6a-0d82bd67176f" condition="contains">
+            <Context document="DriverItem" search="DriverItem/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">IoCreateDriver</Content>
+          </IndicatorItem>
+          <IndicatorItem id="ca06ddef-8f72-4a42-8683-e56d92e9c7b3" condition="contains">
+            <Context document="DriverItem" search="DriverItem/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">KeInsertQueueApc</Content>
+          </IndicatorItem>
+          <IndicatorItem id="8cd27343-dee6-4367-bcc2-89f58ce34784" condition="contains">
+            <Context document="DriverItem" search="DriverItem/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwDeviceIoControlFile</Content>
+          </IndicatorItem>
+          <IndicatorItem id="05a59536-e89b-4f21-90a1-ece2c520648a" condition="contains">
+            <Context document="DriverItem" search="DriverItem/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">RtlRandom</Content>
+          </IndicatorItem>
+          <IndicatorItem id="80600916-5e76-4478-8865-5c838b9842a5" condition="contains">
+            <Context document="DriverItem" search="DriverItem/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwQueryVolumeInformationFile</Content>
+          </IndicatorItem>
+        </Indicator>
+      </Indicator>
+      <Indicator operator="AND" id="81756769-6172-4976-81b0-4a879841c426">
+        <IndicatorItem id="171068db-8795-48ac-8ce7-69c03e3235eb" condition="contains">
+          <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+          <Content type="string">NSIS_Inetc</Content>
+        </IndicatorItem>
+        <Indicator operator="AND" id="4565bae0-8bb7-4a2c-ade3-eee619547d81">
+          <IndicatorItem id="dbe5c12f-f7e9-4671-aa31-bc5fec37c4da" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwAdjustPrivilegesToken</Content>
+          </IndicatorItem>
+          <IndicatorItem id="9e767330-6b1d-451d-9bf4-d51bf18db973" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwQuerySystemInformation</Content>
+          </IndicatorItem>
+          <IndicatorItem id="c943f419-3c1b-442a-86e4-ac65f52c9844" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwCreateSymbolicLinkObject</Content>
+          </IndicatorItem>
+          <IndicatorItem id="17a0e390-d39b-4c48-ab8d-336a329ca478" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwLoadDriver</Content>
+          </IndicatorItem>
+          <IndicatorItem id="e2f22c56-8722-4c5f-a0c3-8752aae844ba" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">BindIoCompletionCallback</Content>
+          </IndicatorItem>
+          <IndicatorItem id="3938282a-ad20-49fa-a7a9-1828a7762e92" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">LdrGetProcedureAddress</Content>
+          </IndicatorItem>
+          <IndicatorItem id="968685bc-37ec-4125-9b4d-82aafcc123a3" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">RtlComputeCrc32</Content>
+          </IndicatorItem>
+          <IndicatorItem id="6227b8af-2ca8-4b2a-9e42-a480e881bb73" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwQueueApcThread</Content>
+          </IndicatorItem>
+        </Indicator>
+        <Indicator operator="AND" id="fcc37e1f-0216-4e22-88e9-9e4abd09c4bf">
+          <IndicatorItem id="5a53f3dc-8121-43f3-b0d0-4dfc7e87a607" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ZwSuspendThread</Content>
+          </IndicatorItem>
+          <IndicatorItem id="04a00e32-d265-47bb-a80d-c860e0255b2a" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+            <Content type="string">sfc_os.dll</Content>
+          </IndicatorItem>
+        </Indicator>
+        <Indicator operator="AND" id="8be04069-16f2-4994-83c4-b11283c3ab72">
+          <IndicatorItem id="483aae07-b1f3-4fcd-87c1-0dfea5e0e807" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string" type="mir" />
+            <Content type="string">ShellExecuteExW</Content>
+          </IndicatorItem>
+          <IndicatorItem id="52ad7aa5-3783-4aef-8c96-dd919bbe251c" condition="contains">
+            <Context document="ProcessItem" search="ProcessItem/StringList/string" type="mir" />
+            <Content type="string">runas</Content>
+          </IndicatorItem>
+        </Indicator>
+      </Indicator>
+    </Indicator>
+  </definition>
+</ioc>
