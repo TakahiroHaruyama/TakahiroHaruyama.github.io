@@ -5,13 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Blog Archive - CCI</title>
+  <title>PlugX Builder/Controller (Type III, 0x840) - CCI</title>
   <meta name="author" content="Takahiro Haruyama (@cci_forensics)">
 
   
-  <meta name="description" content="Blog Archive 2014 PlugX Builder/Controller (Type III, 0x840)
-Mar 12 2014 posted in Malware 64bit big sized RAM Image Acquisition Problem
-Jan 07 2014 &hellip;">
+  <meta name="description" content="Recently, I acquired a PlugX builder/controller. This seems to be the same as the one referred in AhnLab&rsquo;s APT attacks analysis report, judging &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +18,7 @@ Jan 07 2014 &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://TakahiroHaruyama.github.io/archives">
+  <link rel="canonical" href="http://TakahiroHaruyama.github.io/blog/2014/03/12/plugx-builder-slash-controller">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="CCI" type="application/atom+xml">
@@ -96,63 +94,149 @@ Jan 07 2014 &hellip;">
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Blog Archive</h1>
+    
+      <h1 class="entry-title">PlugX Builder/Controller (Type III, 0x840)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-12T19:44:27+09:00" pubdate data-updated="true">Mar 12<span>th</span>, 2014</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives">
 
 
+<div class="entry-content"><p>Recently, I acquired a PlugX builder/controller. This seems to be the same as the one referred in <a href="http://image.ahnlab.com/global/upload/download/documents/1401223631603288.pdf">AhnLab&rsquo;s APT attacks analysis report</a>, judging from the GUI window. I tried to use it.</p>
 
-  
-  <h2>2014</h2>
-
-<article>
-  
-<h1><a href="/blog/2014/03/12/plugx-builder-slash-controller/">PlugX Builder/Controller (Type III, 0x840)</a></h1>
-<time datetime="2014-03-12T19:44:27+09:00" pubdate><span class='month'>Mar</span> <span class='day'>12</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/malware/'>Malware</a></span>
-</footer>
+<!-- more -->
 
 
-</article>
+<p>This PlugX version (we call it &ldquo;TypeIII&rdquo;) supports custom DNS servers.</p>
+
+<p><img src="/images/post/plugx_dns.PNG" alt="plugx_dns" /></p>
+
+<p>The service information like service(or dll) name and service description is simpler than Type I/II.</p>
+
+<p><img src="/images/post/PlugX_ServiceInfo.PNG" alt="PlugX_ServiceInfo" /></p>
+
+<p>The controller also provides online status of victims.</p>
+
+<p><img src="/images/post/PlugX_online.PNG" alt="PlugX_online" /></p>
+
+<h3>Why two &ldquo;Build&rdquo; buttons?</h3>
+
+<p>The funny thing is that there are two kinds of &ldquo;build&rdquo; buttons in this builder.
+That&rsquo;s because type III specimens merge C2 setting, C2 setting URL (which is the location of DZKS/DZJS encoded file/text), proxy setting into 1 structure.</p>
+
+<p>C2 setting tab</p>
+
+<p><img src="/images/post/PlugX_C2Setting.PNG" alt="PlugX_C2Setting" /></p>
+
+<p>C2 setting URL tab</p>
+
+<p><img src="/images/post/PlugX_C2SettingURL.PNG" alt="PlugX_C2SettingURL" /></p>
+
+<p>The built sample includes only either C2 setting or C2 setting URL. If you build in C2Setting tab, the sample includes only C2Setting information, vice versa. The size is fixed 0x840 bytes.</p>
+
+<p><img src="/images/post/PlugX_parsedConfig.PNG" alt="PlugX_parsedConfig" /></p>
+
+<p>The config parser will be released after <a href="https://www.blackhat.com/asia-14/briefings.html#Haruyama">Black Hat Asia 2014 conference</a> (I will also explain type I/II/III behavior, besides, co-author Hiroshi Suzuki will show the relationships between PlugX samples and attack groups)</p>
+
+<h3>Supported Commands</h3>
+
+<p>And once connected by a victim, I can open the command window.</p>
+
+<p><img src="/images/post/PlugX_commands.PNG" alt="PlugX_commands" /></p>
+
+<p>I&rsquo;m surprised RAT version is different from the controller version.</p>
+
+<p>The supported commands and functions are:</p>
+
+<ul>
+<li>Disk Management</li>
+<li>File Transfer</li>
+<li>Process Management</li>
+<li>Service Management</li>
+<li>Registry Management</li>
+<li>Screenshot</li>
+<li>Remote Control</li>
+<li>DOS command</li>
+<li>Port Mapping</li>
+<li>Keylogger</li>
+<li>Local Log</li>
+<li>Remote log</li>
+</ul>
 
 
+<h3>The hash values</h3>
 
-<article>
-  
-<h1><a href="/blog/2014/01/07/64bit-big-size-ram-acquisition-problem/">64bit big sized RAM Image Acquisition Problem</a></h1>
-<time datetime="2014-01-07T22:15:39+09:00" pubdate><span class='month'>Jan</span> <span class='day'>07</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/forensics/'>Forensics</a></span>
-</footer>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2014/01/05/some-old-stuffs/">Some Old Stuffs</a></h1>
-<time datetime="2014-01-05T23:37:20+09:00" pubdate><span class='month'>Jan</span> <span class='day'>05</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/forensics/'>Forensics</a>, <a class='category' href='/blog/categories/malware/'>Malware</a></span>
-</footer>
-
-
-</article>
-
+<p>SHA256=de7a97efe1fd0aff0a90f703becc9162124ee86901a1ad57bcf5d2884c2235d2
+MD5=b4d8bfb56accbd17514bffc1fa8e1953</p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Takahiro Haruyama (@cci_forensics)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-12T19:44:27+09:00" pubdate data-updated="true">Mar 12<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/malware/'>Malware</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://TakahiroHaruyama.github.io/blog/2014/03/12/plugx-builder-slash-controller/" data-via="cci_forensics" data-counturl="http://TakahiroHaruyama.github.io/blog/2014/03/12/plugx-builder-slash-controller/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/01/07/64bit-big-size-ram-acquisition-problem/" title="Previous Post: 64bit big sized RAM Image Acquisition Problem">&laquo; 64bit big sized RAM Image Acquisition Problem</a>
+      
+      
+    </p>
+  </footer>
 </article>
 
 </div>

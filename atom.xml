@@ -4,7 +4,7 @@
   <title><![CDATA[CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-01-06T23:07:45+09:00</updated>
+  <updated>2014-03-12T22:38:16+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -12,6 +12,80 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[PlugX Builder/Controller (Type III, 0x840)]]></title>
+    <link href="http://TakahiroHaruyama.github.io/blog/2014/03/12/plugx-builder-slash-controller/"/>
+    <updated>2014-03-12T19:44:27+09:00</updated>
+    <id>http://TakahiroHaruyama.github.io/blog/2014/03/12/plugx-builder-slash-controller</id>
+    <content type="html"><![CDATA[<p>Recently, I acquired a PlugX builder/controller. This seems to be the same as the one referred in <a href="http://image.ahnlab.com/global/upload/download/documents/1401223631603288.pdf">AhnLab&rsquo;s APT attacks analysis report</a>, judging from the GUI window. I tried to use it.</p>
+
+<!-- more -->
+
+
+<p>This PlugX version (we call it &ldquo;TypeIII&rdquo;) supports custom DNS servers.</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/plugx_dns.PNG" alt="plugx_dns" /></p>
+
+<p>The service information like service(or dll) name and service description is simpler than Type I/II.</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/PlugX_ServiceInfo.PNG" alt="PlugX_ServiceInfo" /></p>
+
+<p>The controller also provides online status of victims.</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/PlugX_online.PNG" alt="PlugX_online" /></p>
+
+<h3>Why two &ldquo;Build&rdquo; buttons?</h3>
+
+<p>The funny thing is that there are two kinds of &ldquo;build&rdquo; buttons in this builder.
+That&rsquo;s because type III specimens merge C2 setting, C2 setting URL (which is the location of DZKS/DZJS encoded file/text), proxy setting into 1 structure.</p>
+
+<p>C2 setting tab</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/PlugX_C2Setting.PNG" alt="PlugX_C2Setting" /></p>
+
+<p>C2 setting URL tab</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/PlugX_C2SettingURL.PNG" alt="PlugX_C2SettingURL" /></p>
+
+<p>The built sample includes only either C2 setting or C2 setting URL. If you build in C2Setting tab, the sample includes only C2Setting information, vice versa. The size is fixed 0x840 bytes.</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/PlugX_parsedConfig.PNG" alt="PlugX_parsedConfig" /></p>
+
+<p>The config parser will be released after <a href="https://www.blackhat.com/asia-14/briefings.html#Haruyama">Black Hat Asia 2014 conference</a> (I will also explain type I/II/III behavior, besides, co-author Hiroshi Suzuki will show the relationships between PlugX samples and attack groups)</p>
+
+<h3>Supported Commands</h3>
+
+<p>And once connected by a victim, I can open the command window.</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/PlugX_commands.PNG" alt="PlugX_commands" /></p>
+
+<p>I&rsquo;m surprised RAT version is different from the controller version.</p>
+
+<p>The supported commands and functions are:</p>
+
+<ul>
+<li>Disk Management</li>
+<li>File Transfer</li>
+<li>Process Management</li>
+<li>Service Management</li>
+<li>Registry Management</li>
+<li>Screenshot</li>
+<li>Remote Control</li>
+<li>DOS command</li>
+<li>Port Mapping</li>
+<li>Keylogger</li>
+<li>Local Log</li>
+<li>Remote log</li>
+</ul>
+
+
+<h3>The hash values</h3>
+
+<p>SHA256=de7a97efe1fd0aff0a90f703becc9162124ee86901a1ad57bcf5d2884c2235d2
+MD5=b4d8bfb56accbd17514bffc1fa8e1953</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[64bit big sized RAM Image Acquisition Problem]]></title>
