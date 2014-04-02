@@ -4,7 +4,7 @@
   <title><![CDATA[Category: IR | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/ir/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-04-02T17:33:37+09:00</updated>
+  <updated>2014-04-02T17:54:59+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -70,7 +70,7 @@ The Immunity Debugger script can be used for PlugX type I&amp;II. The IDAPython 
 
 <p><strong>2014/4/2 updated</strong></p>
 
-<p>Immunity Debugger script output improved and 0x7AC config added (thanks to You Nakatsuru/Arai)</p>
+<p>Immunity Debugger script output improved and 0x7AC#2 config added, that is different from Type III 0x7AC (thanks to You Nakatsuru/Arai)</p>
 ]]></content>
   </entry>
   
