@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Forensics | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/forensics/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-04-22T11:00:37+09:00</updated>
+  <updated>2014-04-22T11:10:09+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -32,7 +32,7 @@
 <p>Today, I re-evaluated memory analysis tools: Volatility Framework 2.3.1 and Mandiant Redline 1.11.1
 (now no one uses HBGary Responder, right?). I loaded the PoC driver modifying abort factors again then acquired the RAM. Unfortunately, the results were the same as those two years ago. I could not extract any information from the image.</p>
 
-<p><img src="/images/post/amf/aborted_volatility.JPG" alt="abort_vol" /></p>
+<p><img src="/images/post/amf/aborted_volatility.jpg" alt="abort_vol" /></p>
 
 <p><img src="/images/post/amf/aborted_redline.jpg" alt="abort_red" /></p>
 
