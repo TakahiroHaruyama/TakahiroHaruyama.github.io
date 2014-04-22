@@ -4,7 +4,7 @@
   <title><![CDATA[CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-04-02T17:54:59+09:00</updated>
+  <updated>2014-04-22T11:00:37+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -12,6 +12,40 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Memory Forensics: still aborted]]></title>
+    <link href="http://TakahiroHaruyama.github.io/blog/2014/04/21/memory-forensics-still-aborted/"/>
+    <updated>2014-04-21T19:34:48+09:00</updated>
+    <id>http://TakahiroHaruyama.github.io/blog/2014/04/21/memory-forensics-still-aborted</id>
+    <content type="html"><![CDATA[<p>2 years ago, I talked about the anti memory forensic method by modifying Windows kernel data structure on victim systems at <a href="http://www.blackhat.com/html/bh-eu-12/bh-eu-12-archives.html#haruyama">BlackHat Europe 2012</a>. The situation is still the same.</p>
+
+<!-- more -->
+
+
+<h3>Abort Factors and PoC Driver</h3>
+
+<p>In the past presentation, I showed &ldquo;Abort Factors&rdquo;, they are key structures for virtual address translation, guessing OS version and listing kernel objects. Once they are modified, memory analysis tools cannot continue to analyze images.</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/amf/AbortFactors.jpg" alt="AbortFactors" /></p>
+
+<p>Today, I re-evaluated memory analysis tools: Volatility Framework 2.3.1 and Mandiant Redline 1.11.1
+(now no one uses HBGary Responder, right?). I loaded the PoC driver modifying abort factors again then acquired the RAM. Unfortunately, the results were the same as those two years ago. I could not extract any information from the image.</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/amf/aborted_volatility.JPG" alt="abort_vol" /></p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/amf/aborted_redline.jpg" alt="abort_red" /></p>
+
+<h3>Countermeasures</h3>
+
+<p>As I explained in the slides, the countermeasures are simple.</p>
+
+<p>The tools should keep their guessings at a minimum. For instance, support a crash dump format. A crash dump includes CR3 register value, so tools need not guess kernel DTB (Directory Table Base). If CR3 value is modified, BSOD always occurs. Besides, allow users to specify OS versions.
+Volatility Framework already support the options. In that sense, Volatility is better than Redline.</p>
+
+<p>On the other hand, Redline (Memoryze) is better than Volatility in terms of the kernel object listing (e.g., pslist command) because it doesn&rsquo;t depend on debug data structure like _DBGKD_DEBUG_DATA_HEADER64. However, Volatility users can use psscan instead of pslist. Therefore, it may be nothing more than a trivial risk.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ID/IDAPython scripts extracting PlugX configs]]></title>

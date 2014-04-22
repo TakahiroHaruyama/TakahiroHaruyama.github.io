@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Category: Forensics - CCI</title>
+  <title>Memory Forensics: still aborted - CCI</title>
   <meta name="author" content="Takahiro Haruyama (@cci_forensics)">
 
   
-  <meta name="description" content="Category: Forensics">
+  <meta name="description" content="2 years ago, I talked about the anti memory forensic method by modifying Windows kernel data structure on victim systems at BlackHat Europe 2012. The &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://TakahiroHaruyama.github.ioblog/categories/forensics">
+  <link rel="canonical" href="http://TakahiroHaruyama.github.io/blog/2014/04/21/memory-forensics-still-aborted">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="CCI" type="application/atom+xml">
@@ -94,63 +94,109 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Category: Forensics</h1>
+    
+      <h1 class="entry-title">Memory Forensics: Still Aborted</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-21T19:34:48+09:00" pubdate data-updated="true">Apr 21<span>st</span>, 2014</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives" class="category">
 
 
+<div class="entry-content"><p>2 years ago, I talked about the anti memory forensic method by modifying Windows kernel data structure on victim systems at <a href="http://www.blackhat.com/html/bh-eu-12/bh-eu-12-archives.html#haruyama">BlackHat Europe 2012</a>. The situation is still the same.</p>
 
-  
-  <h2>2014</h2>
-
-<article>
-  
-<h1><a href="/blog/2014/04/21/memory-forensics-still-aborted/">Memory Forensics: still aborted</a></h1>
-<time datetime="2014-04-21T19:34:48+09:00" pubdate><span class='month'>Apr</span> <span class='day'>21</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/forensics/'>Forensics</a></span>
-</footer>
+<!-- more -->
 
 
-</article>
+<h3>Abort Factors and PoC Driver</h3>
 
+<p>In the past presentation, I showed &ldquo;Abort Factors&rdquo;, they are key structures for virtual address translation, guessing OS version and listing kernel objects. Once they are modified, memory analysis tools cannot continue to analyze images.</p>
 
+<p><img src="/images/post/amf/AbortFactors.jpg" alt="AbortFactors" /></p>
 
-<article>
-  
-<h1><a href="/blog/2014/01/07/64bit-big-size-ram-acquisition-problem/">64bit big sized RAM Image Acquisition Problem</a></h1>
-<time datetime="2014-01-07T22:15:39+09:00" pubdate><span class='month'>Jan</span> <span class='day'>07</span> <span class='year'>2014</span></time>
+<p>Today, I re-evaluated memory analysis tools: Volatility Framework 2.3.1 and Mandiant Redline 1.11.1
+(now no one uses HBGary Responder, right?). I loaded the PoC driver modifying abort factors again then acquired the RAM. Unfortunately, the results were the same as those two years ago. I could not extract any information from the image.</p>
 
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/forensics/'>Forensics</a></span>
-</footer>
+<p><img src="/images/post/amf/aborted_volatility.JPG" alt="abort_vol" /></p>
 
+<p><img src="/images/post/amf/aborted_redline.jpg" alt="abort_red" /></p>
 
-</article>
+<h3>Countermeasures</h3>
 
+<p>As I explained in the slides, the countermeasures are simple.</p>
 
+<p>The tools should keep their guessings at a minimum. For instance, support a crash dump format. A crash dump includes CR3 register value, so tools need not guess kernel DTB (Directory Table Base). If CR3 value is modified, BSOD always occurs. Besides, allow users to specify OS versions.
+Volatility Framework already support the options. In that sense, Volatility is better than Redline.</p>
 
-<article>
-  
-<h1><a href="/blog/2014/01/05/some-old-stuffs/">Some Old Stuffs</a></h1>
-<time datetime="2014-01-05T23:37:20+09:00" pubdate><span class='month'>Jan</span> <span class='day'>05</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/forensics/'>Forensics</a>, <a class='category' href='/blog/categories/malware/'>Malware</a></span>
-</footer>
-
-
-</article>
-
+<p>On the other hand, Redline (Memoryze) is better than Volatility in terms of the kernel object listing (e.g., pslist command) because it doesn&rsquo;t depend on debug data structure like _DBGKD_DEBUG_DATA_HEADER64. However, Volatility users can use psscan instead of pslist. Therefore, it may be nothing more than a trivial risk.</p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Takahiro Haruyama (@cci_forensics)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-21T19:34:48+09:00" pubdate data-updated="true">Apr 21<span>st</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/forensics/'>Forensics</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://TakahiroHaruyama.github.io/blog/2014/04/21/memory-forensics-still-aborted/" data-via="cci_forensics" data-counturl="http://TakahiroHaruyama.github.io/blog/2014/04/21/memory-forensics-still-aborted/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/03/27/id-slash-idapython-scripts-extracting-plugx-configs/" title="Previous Post: ID/IDAPython scripts extracting PlugX configs">&laquo; ID/IDAPython scripts extracting PlugX configs</a>
+      
+      
+    </p>
+  </footer>
 </article>
 
 </div>
