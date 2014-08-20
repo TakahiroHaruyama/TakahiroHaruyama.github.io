@@ -9,7 +9,7 @@
   <meta name="author" content="Takahiro Haruyama (@cci_forensics)">
 
   
-  <meta name="description" content="2 years ago, I talked about the anti memory forensic method by modifying Windows kernel data structure on victim systems at BlackHat Europe 2012. The &hellip;">
+  <meta name="description" content="Last year, I proposed &ldquo;volatile Indicators of Compromise (IOCs)&rdquo; based on RAM evidence only at SANS DFIR Summit. We can detect malware &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -95,6 +95,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/">Fast Malware Triage Using Openioc_scan Volatility Plugin</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-15T15:36:26+09:00" pubdate data-updated="true">Aug 15<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Last year, I proposed &ldquo;volatile Indicators of Compromise (IOCs)&rdquo; based on RAM evidence only at <a href="http://digital-forensics.sans.org/summit-archives/DFIR_Summit/Volatile-IOCs-for-Fast-Incident-Response-Haruyama.pdf">SANS DFIR Summit</a>. We can detect malware using them faster than using disk-evidence-based IOCs. Besides, we can define indicators based on not only metadata (e.g., file path) but also malware function (e.g., code injection sign, imported functions and unpacked codes). The IOCs are described according to <a href="http://www.openioc.org/">OpenIOC</a> specification. <a href="http://www.mandiant.com/resources/download/ioc-editor/">IOC Editor</a> is used for defining IOCs and <a href="https://www.mandiant.com/resources/download/redline">Redline</a> is used for scannning IOCs.</p>
+
+<p>Since then, I continued to make volatile IOCs and detect malware through the tools, but I&rsquo;ve got some frustrating problems about them. First, We can&rsquo;t automate IOC scanning for daily task because Redline is a GUI tool. Second, Redline is compliant with OpenIOC 1.0 but the spec doesn&rsquo;t support regular expression, case sensitiveness. In addition, &ldquo;AND&rdquo; combination of different items (e.g., ProcessItem and DriverItem) does not work. So I decied to make a new tool for volatile IOCs.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -366,6 +409,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/">Fast Malware Triage Using Openioc_scan Volatility Plugin</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/04/21/memory-forensics-still-aborted/">Memory Forensics: Still Aborted</a>
       </li>
     
@@ -379,10 +426,6 @@
     
       <li class="post">
         <a href="/blog/2014/01/07/64bit-big-size-ram-acquisition-problem/">64bit Big Sized RAM Image Acquisition Problem</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/01/05/some-old-stuffs/">Some Old Stuffs</a>
       </li>
     
   </ul>

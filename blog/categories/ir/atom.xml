@@ -4,7 +4,7 @@
   <title><![CDATA[Category: IR | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/ir/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-04-22T11:10:09+09:00</updated>
+  <updated>2014-08-20T20:26:22+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -12,6 +12,155 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Fast Malware Triage using openioc_scan Volatility Plugin]]></title>
+    <link href="http://TakahiroHaruyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/"/>
+    <updated>2014-08-15T15:36:26+09:00</updated>
+    <id>http://TakahiroHaruyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin</id>
+    <content type="html"><![CDATA[<p>Last year, I proposed &ldquo;volatile Indicators of Compromise (IOCs)&rdquo; based on RAM evidence only at <a href="http://digital-forensics.sans.org/summit-archives/DFIR_Summit/Volatile-IOCs-for-Fast-Incident-Response-Haruyama.pdf">SANS DFIR Summit</a>. We can detect malware using them faster than using disk-evidence-based IOCs. Besides, we can define indicators based on not only metadata (e.g., file path) but also malware function (e.g., code injection sign, imported functions and unpacked codes). The IOCs are described according to <a href="http://www.openioc.org/">OpenIOC</a> specification. <a href="http://www.mandiant.com/resources/download/ioc-editor/">IOC Editor</a> is used for defining IOCs and <a href="https://www.mandiant.com/resources/download/redline">Redline</a> is used for scannning IOCs.</p>
+
+<p>Since then, I continued to make volatile IOCs and detect malware through the tools, but I&rsquo;ve got some frustrating problems about them. First, We can&rsquo;t automate IOC scanning for daily task because Redline is a GUI tool. Second, Redline is compliant with OpenIOC 1.0 but the spec doesn&rsquo;t support regular expression, case sensitiveness. In addition, &ldquo;AND&rdquo; combination of different items (e.g., ProcessItem and DriverItem) does not work. So I decied to make a new tool for volatile IOCs.</p>
+
+<!-- more -->
+
+
+<h3>openioc_scan Volatility plugin</h3>
+
+<p>I wrote a plugin called &ldquo;openioc_scan&rdquo; for <a href="https://code.google.com/p/volatility/">Volatility Framework</a> that is a open-source memory forensic tool. The plugin supports only Windows Vista or later Windows versions (Linux and Mac OS X are not supported).</p>
+
+<p>To run this plugin, you need to install the following Python modules.</p>
+
+<ul>
+<li><a href="https://pypi.python.org/pypi/lxml/3.2.1">lxml</a></li>
+<li><a href="https://github.com/mandiant/ioc_writer">ioc_writer</a></li>
+<li><a href="https://pypi.python.org/pypi/colorama">colorama</a></li>
+</ul>
+
+
+<p>We also must prepare IOCs for openioc_scan. Openioc_scan accepts only <a href="https://github.com/mandiant/OpenIOC_1.1">OpenIOC 1.1</a> XML files. We can define grep pattern (using &ldquo;matches&rdquo; condition) and case sensitiveness in the version. But unfortunately, Mandiant doesn&rsquo;t provide IOC Editor for the latest version yet. I hope they will publish the updated one. Currently, we should generate IOCs on IOC Editor then convert them into new ones using openioc_10_to_11.py in ioc_writer.</p>
+
+<p>Openioc_scan has several options.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>-p PID, &mdash;pid=PID     Operate on these Process IDs (comma-separated)
+</span><span class='line'>  -i IOC_DIR, &mdash;ioc_dir=IOC_DIR&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>                    Location of IOCs directory
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  -s, &mdash;show            Display IOC definition only
+</span><span class='line'>  -c CACHE_PATH, &mdash;cache_path=CACHE_PATH&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>                    Specify the cache folder path of analysis result
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p></span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>&ldquo;&mdash;show&rdquo; option just shows the IOCs included in the directory specified by &ldquo;&mdash;ioc_dir&rdquo; option.</p>
+
+<p><img src="/images/post/openioc_scan/show.jpg" alt="show" /></p>
+
+<p>If we run openioc_scan without -s option, the plugin scan the specified memory image using IOCs then display the result.</p>
+
+<p><img src="/images/post/openioc_scan/scan.jpg" alt="scan" /></p>
+
+<p>Openioc_scan generates a cache database for result because some IOC items to scan may take long time. If there are no records about items in cache, openioc_scan outputs &ldquo;[time-consuming task]&rdquo; logs during the scan. Once a cache corresponding to defined items is generated, we can scan the same items rapidly.</p>
+
+<p>For instance, the first run took 2327 secs:</p>
+
+<p><img src="/images/post/openioc_scan/1st_run.jpg" alt="1st_run" /></p>
+
+<p>The second run or later took only 149 secs because of cache db extracted by the 1st run:</p>
+
+<p><img src="/images/post/openioc_scan/2nd_run.jpg" alt="2nd_run" /></p>
+
+<h3>Supported Items (2014/8/20)</h3>
+
+<p>I explain 20 items supported by openioc_scan. To make maximal use of openioc_scan, we had better newly add 4 item definitions in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide).</p>
+
+<h4>ProcessItem</h4>
+
+<ul>
+<li><strong>ProcessItem/name</strong> &hellip; process name (max 15 characters)</li>
+<li><strong>ProcessItem/ParentProcessName</strong> &hellip; process name of the parent process &lt;&ndash; should be newly defined in *.iocterms</li>
+<li><strong>ProcessItem/path</strong> &hellip; path in the command line of process</li>
+<li><strong>ProcessItem/DllPath</strong> &hellip; dll path loaded in process (base on <em>ldrmodules</em> command) &lt;&ndash; should be newly defined in *.iocterms</li>
+<li><strong>ProcessItem/arguments</strong> &hellip; command line arguments</li>
+<li><strong>ProcessItem/hidden</strong> &hellip; process hidden by rootkit (e.g., DKOM). This item is based on part of <em>psxview</em> command, but dead process with exit time is excluded before evaluation.</li>
+<li><strong>ProcessItem/SectionList/MemorySection/Injected</strong> &hellip; process with potential section of injected or unpacked code based on <em>malfind</em> command</li>
+<li><strong>ProcessItem/StringList/string</strong> &hellip; strings or binary code sequences</li>
+<li><strong>ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string</strong> &hellip; imported function names based on <em>impscan</em>. The original command scans only base+SizeOfImage, so I added code injected section as scan target. This item doesn&rsquo;t work on wow64 process due to impscan&rsquo;s limitation.</li>
+<li><strong>ProcessItem/HandleList/Handle/Name, ProcessItem/HandleList/Handle/Type</strong> &hellip; process handle information based on <em>handles</em> command</li>
+<li><strong>ProcessItem/PortList/PortItem/localPort, ProcessItem/PortList/PortItem/remotePort, ProcessItem/PortList/PortItem/localIP, ProcessItem/PortList/PortItem/remoteIP</strong> &hellip; network information related to the process from the result of <em>netscan</em> command</li>
+</ul>
+
+
+<h4>RegistryItem</h4>
+
+<ul>
+<li><strong>RegistryItem/Path</strong> &hellip; registry key or value paths based on <em>hivelist&amp;printkey</em>. It&rsquo;s too slow, so I recommend to use handle names instead. For example, it takes 12 hours in 512MB RAM :&ndash;(</li>
+<li><strong>RegistryItem/ShimCache/ExecutablePath</strong> &hellip; exe/dll/bat file paths included in <em>shimcache</em> artifact &lt;&ndash; should be newly defined in *.iocterms</li>
+</ul>
+
+
+<h4>ServiceItem</h4>
+
+<ul>
+<li><strong>ServiceItem/name</strong> &hellip; service name</li>
+<li><strong>ServiceItem/descriptiveName</strong> &hellip; service description name</li>
+<li><strong>ServiceItem/cmdLine</strong> &hellip; command line of the service  &lt;&ndash; should be newly defined in *.iocterms</li>
+</ul>
+
+
+<h3>Examples</h3>
+
+<p>Using openioc_scan, we can detect malware based on our own rules. I show some examples for detecting PlugX type II/III. About PlugX, see this <a href="https://www.blackhat.com/docs/asia-14/materials/Haruyama/Asia-14-Haruyama-I-Know-You-Want-Me-Unplugging-PlugX.pdf">presentation</a>. Actually, all IOCs are generic indicators, so they can be applied to other malware.</p>
+
+<p>rogue svchost:</p>
+
+<p><img src="/images/post/openioc_scan/ex_svchost.jpg" alt="examples" /></p>
+
+<p>unusual executable paths:</p>
+
+<p><img src="/images/post/openioc_scan/ex_iron.jpg" alt="examples" /></p>
+
+<p>malware bypassing UAC pop-up:</p>
+
+<p><img src="/images/post/openioc_scan/ex_uac.jpg" alt="examples" /></p>
+
+<h3>Future Work</h3>
+
+<p>I&rsquo;ll add other useful items (e.g., DriverItem and HookItem). I welcome any feedbacks/requests.</p>
+
+<h3>Download</h3>
+
+<p><a href="/downloads/scripts/openioc_scan.py">openioc_scan.py</a></p>
+
+<p>You can use it by just copying it into volatility\plugins\malware folder.</p>
+
+<p>And example IOCs:</p>
+
+<ul>
+<li><a href="/downloads/IOCs/v11/a50223b5-b213-43e9-beac-dfe9c1ca240c_rogue_svchost.ioc">rogue svchost</a></li>
+<li><a href="/downloads/IOCs/v11/7382c170-7e66-4d72-808e-5f703f39a38d_unusual_path.ioc">suspicious exec path</a></li>
+<li><a href="/downloads/IOCs/v11/cdcd5fdb-fcd3-4947-8c76-d2fbdc1b5f82_UAC.ioc">UAC pop-up bypassing</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ID/IDAPython scripts extracting PlugX configs]]></title>
