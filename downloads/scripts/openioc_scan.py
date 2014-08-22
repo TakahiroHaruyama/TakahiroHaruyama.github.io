@@ -21,7 +21,6 @@ import volatility.win32.hive as hivemod
 import volatility.win32.rawreg as rawreg
 import volatility.plugins.taskmods as taskmods
 import volatility.commands as commands
-import volatility.obj as obj
 
 import glob, os, re, sqlite3, urllib, socket, time
 from lxml import etree as et
