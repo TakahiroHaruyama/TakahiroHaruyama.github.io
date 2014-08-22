@@ -4,7 +4,7 @@
   <title><![CDATA[Category: IR | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/ir/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-08-22T17:13:45+09:00</updated>
+  <updated>2014-08-22T17:27:09+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -149,7 +149,7 @@
 
 <p><a href="/downloads/scripts/openioc_scan.py">openioc_scan.py</a></p>
 
-<p>You can use it by just copying it into volatility\plugins\malware folder.</p>
+<p>You can use it by just copying it into volatility\plugins\malware folder. This plugin works on Volatility 2.4, but not work on 2.3.1.</p>
 
 <p>And example IOCs:</p>
 
