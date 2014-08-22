@@ -21,6 +21,7 @@ import volatility.win32.hive as hivemod
 import volatility.win32.rawreg as rawreg
 import volatility.plugins.taskmods as taskmods
 import volatility.commands as commands
+import volatility.obj as obj
 
 import glob, os, re, sqlite3, urllib, socket, time
 from lxml import etree as et
@@ -91,6 +92,9 @@ class ItemUtil:
             if pattern.search(target) is not None:
                 return True
         else:
+            #if isinstance(target, unicode):
+            #    debug.info('unicode converted')
+            #    content = unicode(content)
             if preserve_case == 'false':
                 target = target.lower()
                 content = content.lower()
@@ -807,11 +811,17 @@ class IOC_Scanner:
         self.cur = cur
         self._config = _config
 
-    def withproc(self):
+    def withproc(self, iocid):
+        ioc_obj = self.iocs[iocid]
+        ioc_logic = ioc_obj.root.xpath('.//criteria')[0]
+        if len(ioc_logic.xpath('//Context[@document="ProcessItem"]')) > 0:
+            return True
+        else:
+            return False
+
+    def withproc_all(self):
         for iocid in self.iocs:
-            ioc_obj = self.iocs[iocid]
-            ioc_logic = ioc_obj.root.xpath('.//criteria')[0]
-            if len(ioc_logic.xpath('//Context[@document="ProcessItem"]')) > 0:
+            if self.withproc(iocid):
                 return True
         return False
 
@@ -912,7 +922,7 @@ class IOC_Scanner:
                 # should never get here
                 raise IOCParseError('node is not a Indicator/IndicatorItem')
 
-    def scan(self, process):
+    def scan(self, iocid, process):
         result = ''
 
         if len(self) < 1:
@@ -922,23 +932,22 @@ class IOC_Scanner:
         if process is not None:
             self.items['Process'] = ProcessItem(process, self.cur, self._config)
 
-        for iocid in self.iocs:
-            ioc_obj = self.iocs[iocid]
-            ioc_logic = ioc_obj.root.xpath('.//criteria')[0]
-            try:
-                tlo = ioc_logic.getchildren()[0]
-            except IndexError, e:
-                debug.warning('Could not find children for the top level criteria/children nodes for IOC [{0}]'.format(str(iocid)))
-                continue
+        ioc_obj = self.iocs[iocid]
+        ioc_logic = ioc_obj.root.xpath('.//criteria')[0]
+        try:
+            tlo = ioc_logic.getchildren()[0]
+        except IndexError, e:
+            debug.warning('Could not find children for the top level criteria/children nodes for IOC [{0}]'.format(str(iocid)))
+            return result
 
-            self.walk_indicator(tlo)
-            debug.debug(self.iocEvalString)
-            if eval(self.iocEvalString):
-                result += ('------------------------------------------------------\n')
-                result += ('IOC matched! short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid))
-                result += ('logic (matched item is red-colored):\n{0}'.format(self.iocLogicString))
-            self.iocEvalString=""
-            self.iocLogicString=""
+        self.walk_indicator(tlo)
+        debug.debug(self.iocEvalString)
+        if eval(self.iocEvalString):
+            #result += ('------------------------------------------------------\n')
+            result += ('IOC matched! short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid))
+            result += ('logic (matched item is red-colored):\n{0}'.format(self.iocLogicString))
+        self.iocEvalString=""
+        self.iocLogicString=""
 
         self.items['Process'] = None
         return result
@@ -1067,7 +1076,8 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
 
     def parse_cmdline(self, process):
         debug.debug(process.ImageFileName)
-        if str(process.ImageFileName) != "System":
+        #if str(process.ImageFileName) != "System":
+        if (str(process.ImageFileName) != "System") and (not isinstance(process.Peb, obj.NoneObject)):
             cmdline = str(process.Peb.ProcessParameters.CommandLine).lower()
             debug.debug('name="{0}", cmdline="{1}" (pid{2})'.format(process.ImageFileName, cmdline or None, process.UniqueProcessId))
             if cmdline is not None:
@@ -1132,25 +1142,28 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
         else:
             self.init_db()
             scanner.prepare(self.cur, self._config)
-            if scanner.withproc():
+            procs = None
+            if scanner.withproc_all():
                 procs = self.extract_all_active_procs()
                 # pre-generated process entries in db for all updated tasks (e.g., netinfo)
                 for process in self.filter_tasks(procs):
                     self.cur.execute("insert or ignore into done values(?, ?, ?, ?, ?, ?, ?, ?)", (process.UniqueProcessId.v(), False, False, False, False, False, False, False))
-                for process in self.filter_tasks(procs):
+            for iocid in scanner.iocs:
+                if scanner.withproc(iocid):
+                    for process in self.filter_tasks(procs):
+                        with Timer() as t:
+                            result = scanner.scan(iocid, process)
+                        debug.debug("=> elasped scan: {0} s (pid{1})".format(t.secs, process.UniqueProcessId))
+                        self.total_secs += t.secs
+                        if result != '':
+                            yield process, result
+                else:
                     with Timer() as t:
-                        result = scanner.scan(process)
-                    debug.debug("=> elasped scan: {0} s (pid{1})".format(t.secs, process.UniqueProcessId))
+                        result = scanner.scan(iocid, None)
+                    debug.debug("=> elasped scan: {0} s".format(t.secs))
                     self.total_secs += t.secs
                     if result != '':
-                        yield process, result
-            else:
-                with Timer() as t:
-                    result = scanner.scan(None)
-                debug.debug("=> elasped scan: {0} s".format(t.secs))
-                self.total_secs += t.secs
-                if result != '':
-                    yield None, result
+                        yield None, result
 
     def render_text(self, outfd, data):
         if self._config.show:
