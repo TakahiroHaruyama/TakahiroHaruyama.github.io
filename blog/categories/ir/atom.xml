@@ -4,7 +4,7 @@
   <title><![CDATA[Category: IR | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/ir/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-08-22T17:35:46+09:00</updated>
+  <updated>2014-08-25T15:46:38+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -38,7 +38,7 @@
 </ul>
 
 
-<p>We also must prepare IOCs for openioc_scan. Openioc_scan accepts only <a href="https://github.com/mandiant/OpenIOC_1.1">OpenIOC 1.1</a> XML files. We can define grep pattern (using &ldquo;matches&rdquo; condition) and case sensitiveness in the version. But unfortunately, Mandiant doesn&rsquo;t provide IOC Editor for the latest version yet. I hope they will publish the updated one. Currently, we should generate IOCs on IOC Editor then convert them into new ones using openioc_10_to_11.py in ioc_writer.</p>
+<p>We also must prepare IOCs for openioc_scan. Openioc_scan accepts only <a href="https://github.com/mandiant/OpenIOC_1.1">OpenIOC 1.1</a> XML files. We can define grep pattern (using &ldquo;matches&rdquo; condition) and case sensitiveness in the version. But unfortunately, Mandiant doesn&rsquo;t provide IOC Editor for the latest version yet. <del>I hope they will publish the updated one. Currently, we should generate IOCs on IOC Editor then convert them into new ones using openioc_10_to_11.py in ioc_writer.</del> <strong>(2014/8/25)</strong> Sean Gillespie distributes open-source IOC editor, <a href="https://github.com/yahoo/PyIOCe">PyIOCe</a>. We can generate OpenIOC 1.1 indicator files using it.</p>
 
 <p>Openioc_scan has several options.</p>
 
@@ -89,7 +89,9 @@
 
 <h3>Supported Items (2014/8/20)</h3>
 
-<p>I explain 20 items supported by openioc_scan. To make maximal use of openioc_scan, we had better newly add 4 item definitions in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide).</p>
+<p>I explain 20 items supported by openioc_scan. To make maximal use of openioc_scan, we had better newly add 4 item definitions <del>in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide). </del>  <strong>(2014/8/25)</strong> We can add new definitions on PyIOCe from Terms->Indicator Terms menu as follows:</p>
+
+<p><img src="/images/post/openioc_scan/new_terms.jpg" alt="new_terms" /></p>
 
 <h4>ProcessItem</h4>
 
