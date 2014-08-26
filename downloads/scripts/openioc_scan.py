@@ -38,6 +38,16 @@ AF_INET6 = 0x17
 inaddr_any = utils.inet_ntop(socket.AF_INET, '\0' * 4)
 inaddr6_any = utils.inet_ntop(socket.AF_INET6, '\0' * 16)
 
+if constants.VERSION < 2.4:
+    # copied from malfind
+    class MalwareObjectClases(obj.ProfileModification):
+        before = ['WindowsObjectClasses']
+        conditions = {'os': lambda x: x == 'windows'}
+        def modification(self, profile):
+            profile.object_classes.update({
+                '_EPROCESS': malfind.MalwareEPROCESS,
+            })
+
 class Timer(object):
     def __init__(self, verbose=False):
         self.verbose = verbose
