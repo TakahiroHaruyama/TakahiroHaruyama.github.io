@@ -4,7 +4,7 @@
   <title><![CDATA[CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-09-15T21:09:38+09:00</updated>
+  <updated>2014-09-15T21:23:11+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -130,15 +130,19 @@
 
 <p>rogue svchost:</p>
 
-<p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_scan/ex_svchost.jpg" alt="examples" /></p>
+<p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_scan/ex_svchost.jpg" alt="examples1" /></p>
 
 <p>unusual executable paths:</p>
 
-<p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_scan/ex_iron.jpg" alt="examples" /></p>
+<p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_scan/ex_iron.jpg" alt="examples2" /></p>
 
 <p>malware bypassing UAC pop-up:</p>
 
-<p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_scan/ex_uac.jpg" alt="examples" /></p>
+<p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_scan/ex_uac.jpg" alt="examples3" /></p>
+
+<p>WebInject malware (e.g., ZeuS and its variants):</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_scan/webinject.jpg" alt="examples4" /></p>
 
 <h3>Future Work</h3>
 
