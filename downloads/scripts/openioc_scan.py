@@ -3,24 +3,30 @@
 # Copyright (c) 2014 Takahiro Haruyama (@cci_forensics)
 # http://takahiroharuyama.github.io/
 
-import volatility.plugins.common as common
 import volatility.utils as utils
-import volatility.win32.tasks as tasks
 import volatility.obj as obj
 import volatility.debug as debug
+import volatility.constants as constants
+import volatility.commands as commands
+
+import volatility.plugins.common as common
+import volatility.plugins.netscan as netscan
+import volatility.plugins.overlays.windows.tcpip_vtypes as tcpip_vtypes
+import volatility.plugins.registry.hivelist as hivelist
+import volatility.plugins.registry.shimcache as shimcache
+import volatility.plugins.taskmods as taskmods
+import volatility.plugins.modules as modules
+import volatility.plugins.modscan as modscan
 import volatility.plugins.malware.malfind as malfind
 import volatility.plugins.malware.impscan as impscan
 import volatility.plugins.malware.psxview as psxview
 import volatility.plugins.malware.svcscan as svcscan
-import volatility.plugins.netscan as netscan
-import volatility.plugins.overlays.windows.tcpip_vtypes as tcpip_vtypes
-import volatility.constants as constants
-import volatility.plugins.registry.hivelist as hivelist
-import volatility.plugins.registry.shimcache as shimcache
+import volatility.plugins.malware.apihooks as apihooks
+
+import volatility.win32 as win32
 import volatility.win32.hive as hivemod
 import volatility.win32.rawreg as rawreg
-import volatility.plugins.taskmods as taskmods
-import volatility.commands as commands
+import volatility.win32.tasks as tasks
 
 import glob, os, re, sqlite3, urllib, socket, time
 from lxml import etree as et
@@ -28,7 +34,7 @@ from ioc_writer import ioc_api
 import colorama
 colorama.init()
 
-g_version = '2014/08/08'
+g_version = '2014/09/06'
 g_cache_path = ''
 READ_BLOCKSIZE = 1024 * 1024 * 10
 
@@ -47,6 +53,23 @@ if constants.VERSION < 2.4:
             profile.object_classes.update({
                 '_EPROCESS': malfind.MalwareEPROCESS,
             })
+
+# copied from apihooks
+# hook modes
+HOOK_MODE_USER = 1
+HOOK_MODE_KERNEL = 2
+# hook types
+HOOKTYPE_IAT = 4
+HOOKTYPE_EAT = 8
+HOOKTYPE_INLINE = 16
+HOOKTYPE_NT_SYSCALL = 32
+HOOKTYPE_CODEPAGE_KERNEL = 64
+HOOKTYPE_IDT = 128
+HOOKTYPE_IRP = 256
+HOOKTYPE_WINSOCK = 512
+# names for hook types
+hook_type_strings = apihooks.hook_type_strings
+WINSOCK_TABLE = apihooks.WINSOCK_TABLE
 
 class Timer(object):
     def __init__(self, verbose=False):
@@ -165,14 +188,14 @@ class ItemUtil:
         cur.execute(sql)
         return cur.fetchone()[0]
 
-class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
+class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind, apihooks.ApiHooks):
     def __init__(self, process, cur, _config):
         self.process = process
         self.cur = cur
         self._config = _config
         self.kernel_space = utils.load_as(self._config)
         self.flat_space = utils.load_as(self._config, astype = 'physical')
-        self.forwarded_imports = { # for impscan
+        self.forwarded_imports = { # copied from impscan
             "RtlGetLastWin32Error" : "kernel32.dll!GetLastError",
             "RtlSetLastWin32Error" : "kernel32.dll!SetLastError",
             "RtlRestoreLastWin32Error" : "kernel32.dll!SetLastError",
@@ -187,6 +210,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
             "RtlUnwind" : "kernel32.dll!RtlUnwind",
             }
         self.util = ItemUtil()
+        self.compiled_rules = self.compile()
 
     def read_without_zero_page(self, vad, address_space):
         PAGE_SIZE = 0x1000
@@ -216,13 +240,16 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
         sql = "update done set {0} = ?".format(item)
         self.cur.execute(sql, (True, ))
 
-    def fetchall_from_db(self, table, column):
+    def fetchall_from_db_by_pid(self, table, column):
         debug.debug("{0} already done. Results reused (pid={1})".format(table, self.process.UniqueProcessId))
         sql = "select {0} from {1} where pid = ?".format(column, table)
         self.cur.execute(sql, (self.process.UniqueProcessId.v(),))
-        return [record[0] for record in self.cur.fetchall()]
+        records = self.cur.fetchall()
+        if records is None:
+            return []
+        return [record[0] for record in records]
 
-    def fetchone_from_db(self, table, column):
+    def fetchone_from_db_by_pid(self, table, column):
         debug.debug("{0} already done. Results reused (pid={1})".format(table, self.process.UniqueProcessId))
         sql = "select {0} from {1} where pid = ?".format(column, table)
         self.cur.execute(sql, (self.process.UniqueProcessId.v(),))
@@ -237,7 +264,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
             self.cur.execute("insert into injected values (?, ?, ?)", (self.process.UniqueProcessId.v(), vad.Start, vad.Length))
             injected.append([vad.Start, vad.Length])
         self.update_done('injected')
-        return len(injected)
+        return injected
 
     def SectionList_MemorySection_Injected(self, content, condition, preserve_case):
         if not self.util.is_condition_bool(condition):
@@ -246,9 +273,9 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
 
         (done,) = self.check_done('injected')
         if int(done):
-            counts = self.fetchone_from_db('injected', 'count(*)')
+            counts = self.fetchone_from_db_by_pid('injected', 'count(*)')
         else:
-            counts = self.detect_code_injections()
+            counts = len(self.detect_code_injections())
 
         if (counts > 0 and content.lower() == 'true') or (counts == 0 and content.lower() == 'false'):
             return True
@@ -276,7 +303,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
     def check_and_extract_strings(self, content, condition, preserve_case):
         (done,) = self.check_done('strings')
         if int(done):
-            strings = self.fetchall_from_db('strings', 'string')
+            strings = self.fetchall_from_db_by_pid('strings', 'string')
         else:
             strings = self.extract_strings()
         return self.util.check_strings(strings, content, condition, preserve_case)
@@ -344,7 +371,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
 
         (done,) = self.check_done('impfunc')
         if int(done):
-            imp_funcs = self.fetchall_from_db('impfunc', 'func_name')
+            imp_funcs = self.fetchall_from_db_by_pid('impfunc', 'func_name')
             return self.util.check_strings(imp_funcs, content, condition, preserve_case)
 
         debug.info("[time-consuming task] extracting import functions...(pid={0})".format(self.process.UniqueProcessId))
@@ -414,14 +441,14 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
         if not self.util.is_condition_string(condition):
             debug.error('{0} condition is not supported in ProcessItem/path'.format(condition))
             return False
-        path = self.fetchone_from_db('hidden', 'path')
+        path = self.fetchone_from_db_by_pid('hidden', 'path')
         return self.util.check_string(path, content, condition, preserve_case)
 
     def arguments(self, content, condition, preserve_case):
         if not self.util.is_condition_string(condition):
             debug.error('{0} condition is not supported in ProcessItem/arguments'.format(condition))
             return False
-        arguments = self.fetchone_from_db('hidden', 'arguments')
+        arguments = self.fetchone_from_db_by_pid('hidden', 'arguments')
         return self.util.check_string(arguments, content, condition, preserve_case)
 
     # based on malfind.py
@@ -446,7 +473,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
 
         (done,) = self.check_done('dllpath')
         if int(done):
-            dllpaths = self.fetchall_from_db('dllpath', 'path')
+            dllpaths = self.fetchall_from_db_by_pid('dllpath', 'path')
         else:
             dllpaths = self.extract_dllpaths()
         return self.util.check_strings(dllpaths, content, condition, preserve_case)
@@ -502,7 +529,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
 
         (done,) = self.check_done('handles')
         if int(done):
-            names = self.fetchall_from_db('handles', 'name')
+            names = self.fetchall_from_db_by_pid('handles', 'name')
         else:
             names = self.extract_handles(is_name=True)
             if names is None:
@@ -517,7 +544,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
 
         (done,) = self.check_done('handles')
         if int(done):
-            types = self.fetchall_from_db('handles', 'type')
+            types = self.fetchall_from_db_by_pid('handles', 'type')
         else:
             types = self.extract_handles(is_type=True)
             if types is None:
@@ -561,7 +588,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
 
         (done,) = self.check_done('netinfo')
         if int(done):
-            lports = self.fetchall_from_db('netinfo', 'lport')
+            lports = self.fetchall_from_db_by_pid('netinfo', 'lport')
         else:
             lports = self.extract_netinfo(is_lport=True)
             if lports is None:
@@ -576,7 +603,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
 
         (done,) = self.check_done('netinfo')
         if int(done):
-            rports = self.fetchall_from_db('netinfo', 'rport')
+            rports = self.fetchall_from_db_by_pid('netinfo', 'rport')
         else:
             rports = self.extract_netinfo(is_rport=True)
             if rports is None:
@@ -591,7 +618,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
 
         (done,) = self.check_done('netinfo')
         if int(done):
-            laddrs = self.fetchall_from_db('netinfo', 'laddr')
+            laddrs = self.fetchall_from_db_by_pid('netinfo', 'laddr')
         else:
             laddrs = self.extract_netinfo(is_laddr=True)
             if laddrs is None:
@@ -606,7 +633,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
 
         (done,) = self.check_done('netinfo')
         if int(done):
-            raddrs = self.fetchall_from_db('netinfo', 'raddr')
+            raddrs = self.fetchall_from_db_by_pid('netinfo', 'raddr')
         else:
             raddrs = self.extract_netinfo(is_raddr=True)
             if raddrs is None:
@@ -619,11 +646,45 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind):
             debug.error('{0} condition is not supported in ProcessItem/hidden'.format(condition))
             return False
 
-        result = self.fetchone_from_db('hidden', 'result')
+        result = self.fetchone_from_db_by_pid('hidden', 'result')
         if (result and content.lower() == 'true') or ((not result) and content.lower() == 'false'):
             return True
         else:
             return False
+
+    # based on apihooks.py
+    def extract_hooked_APIs(self):
+        debug.info("[time-consuming task] extracting hooked APIs...".format(self.process.UniqueProcessId))
+
+        process_space = self.process.get_process_address_space()
+        if not process_space:
+            return []
+
+        module_group = apihooks.ModuleGroup(self.process.get_load_modules())
+
+        records = []
+        for dll in module_group.mods:
+            if not process_space.is_valid_address(dll.DllBase):
+                continue
+            for hook in self.get_hooks(HOOK_MODE_USER, process_space, dll, module_group):
+                if self.whitelist(hook.hook_mode | hook.hook_type, self.process.ImageFileName.v(), hook.VictimModule, hook.HookModule, hook.Function):
+                    continue
+                records.append((self.process.UniqueProcessId.v(), hook.Mode, hook.Type, str(dll.BaseDllName or ''), hook.Function))
+        self.cur.executemany("insert or ignore into api_hooked values (?, ?, ?, ?, ?)", records)
+        self.update_done('api_hooked')
+        return [record[4] for record in records]
+
+    def Hooked_API_FunctionName(self, content, condition, preserve_case):
+        if not self.util.is_condition_string(condition):
+            debug.error('{0} condition is not supported in ProcessItem/PortList/PortItem/remoteIP'.format(condition))
+            return False
+
+        (done,) = self.check_done('api_hooked')
+        if int(done):
+            hooked_funcs = self.fetchall_from_db_by_pid('api_hooked', 'hooked_func')
+        else:
+            hooked_funcs = self.extract_hooked_APIs()
+        return self.util.check_strings(hooked_funcs, content, condition, preserve_case)
 
 class RegistryItem(hivelist.HiveList, shimcache.ShimCache):
     def __init__(self, cur, _config):
@@ -651,9 +712,10 @@ class RegistryItem(hivelist.HiveList, shimcache.ShimCache):
         paths = []
         count = self.util.fetchone_from_db(self.cur, "regpath", "count(*)")
         if count > 0:
-            paths = self.util.ufetchall_from_db(self.cur, "regpath", "path")
+            paths = self.util.fetchall_from_db(self.cur, "regpath", "path")
         else:
             debug.info("[time-consuming task] extracting registry key/value paths...")
+            debug.warning('Please redefine using process handle name instead of this term because it will take too long time :-(')
             hive_offsets = []
             for hive in hivelist.HiveList.calculate(self):
                 if hive.Hive.Signature == 0xbee0bee0 and hive.obj_offset not in hive_offsets:
@@ -751,6 +813,137 @@ class ServiceItem(svcscan.SvcScan):
                 debug.error('cannot get service information')
         return self.util.check_strings(cmdlines, content, condition, preserve_case)
 
+#class DriverItem(modules.Modules, modules.UnloadedModules, modscan.ModScan, impscan.ImpScan):
+class DriverItem(impscan.ImpScan):
+    def __init__(self, kmod, cur, _config):
+        self.kmod = kmod
+        self.cur = cur
+        self._config = _config
+        self.kernel_space = utils.load_as(self._config)
+        self.flat_space = utils.load_as(self._config, astype = 'physical')
+        self.util = ItemUtil()
+        self.forwarded_imports = { # copied from impscan
+            "RtlGetLastWin32Error" : "kernel32.dll!GetLastError",
+            "RtlSetLastWin32Error" : "kernel32.dll!SetLastError",
+            "RtlRestoreLastWin32Error" : "kernel32.dll!SetLastError",
+            "RtlAllocateHeap" : "kernel32.dll!HeapAlloc",
+            "RtlReAllocateHeap" : "kernel32.dll!HeapReAlloc",
+            "RtlFreeHeap" : "kernel32.dll!HeapFree",
+            "RtlEnterCriticalSection" : "kernel32.dll!EnterCriticalSection",
+            "RtlLeaveCriticalSection" : "kernel32.dll!LeaveCriticalSection",
+            "RtlDeleteCriticalSection" : "kernel32.dll!DeleteCriticalSection",
+            "RtlZeroMemory" : "kernel32.dll!ZeroMemory",
+            "RtlSizeHeap" : "kernel32.dll!HeapSize",
+            "RtlUnwind" : "kernel32.dll!RtlUnwind",
+            }
+
+    def fetchall_from_db_by_name(self, table, column):
+        name = str(self.kmod.BaseDllName  or '')
+        debug.debug("{0} already done. Results reused (name={1})".format(table, name))
+        sql = "select {0} from {1} where name = ?".format(column, table)
+        self.cur.execute(sql, (name,))
+        return [record[0] for record in self.cur.fetchall()]
+
+    def fetchone_from_db_by_name(self, table, column):
+        name = str(self.kmod.BaseDllName  or '')
+        debug.debug("{0} already done. Results reused (name={1})".format(table, name))
+        sql = "select {0} from {1} where name = ?".format(column, table)
+        self.cur.execute(sql, (name,))
+        return self.cur.fetchone()[0]
+
+    def DriverName(self, content, condition, preserve_case):
+        if not self.util.is_condition_string(condition):
+            debug.error('{0} condition is not supported in DriverItem/DriverName'.format(condition))
+            return False
+        return self.util.check_string(str(self.kmod.BaseDllName  or ''), content, condition, preserve_case)
+
+    def get_data(self):
+        base_address = self.kmod.DllBase
+        size_to_read = self.kmod.SizeOfImage
+
+        if not size_to_read:
+            pefile = obj.Object("_IMAGE_DOS_HEADER",
+                                offset = base_address,
+                                vm = self.kernel_space)
+            try:
+                nt_header = pefile.get_nt_header()
+                size_to_read = nt_header.OptionalHeader.SizeOfImage
+            except ValueError:
+                pass
+            if not size_to_read:
+                debug.warning('cannot get size info (kernel module name={0} base=0x{1:x})'.format(str(self.kmod.BaseDllName  or ''), self.kmod.DllBase))
+                return None, None, None
+
+        data = self.kernel_space.zread(base_address, size_to_read)
+        return base_address, size_to_read, data
+
+    # based on impscan.py
+    def PEInfo_ImportedModules_Module_ImportedFunctions_string(self, content, condition, preserve_case):
+        if not self.util.is_condition_string(condition):
+            debug.error('{0} condition is not supported in DriverItem/PEInfo/ImportedModules/Module/ImportedFunctions/string'.format(condition))
+            return False
+
+        imp_funcs = []
+        count = self.fetchone_from_db_by_name("kernel_mods_impfunc", "count(*)")
+        if count > 0:
+            imp_funcs = self.fetchall_from_db_by_name("kernel_mods_impfunc", "func_name")
+        else:
+            debug.info("[time-consuming task] extracting import functions... (kernel module name={0} base=0x{1:x})".format(str(self.kmod.BaseDllName  or ''), self.kmod.DllBase))
+
+            all_mods = list(win32.modules.lsmod(self.kernel_space))
+            base_address, size_to_read, data = self.get_data()
+            if data is None:
+                return False
+
+            apis = self.enum_apis(all_mods)
+            addr_space = self.kernel_space
+
+            calls_imported = dict(
+                    (iat, call)
+                    for (_, iat, call) in self.call_scan(addr_space, base_address, data)
+                    if call in apis
+                    )
+            self._vicinity_scan(addr_space,
+                    calls_imported, apis, base_address, len(data),
+                    forward = True)
+            self._vicinity_scan(addr_space,
+                    calls_imported, apis, base_address, len(data),
+                    forward = False)
+
+            records = []
+            for iat, call in sorted(calls_imported.items()):
+                mod_name, func_name = self._original_import(str(apis[call][0].BaseDllName or ''), apis[call][1])
+                records.append((str(self.kmod.BaseDllName  or ''), iat, call, mod_name, func_name))
+                imp_funcs.append(func_name)
+            self.cur.executemany("insert or ignore into kernel_mods_impfunc values (?, ?, ?, ?, ?)", records)
+
+        return self.util.check_strings(imp_funcs, content, condition, preserve_case)
+
+    def StringList_string(self, content, condition, preserve_case):
+        if not self.util.is_condition_string(condition):
+            debug.error('{0} condition is not supported in DriverItem/StringList/string'.format(condition))
+            return False
+
+        base_address, size_to_read, data = self.get_data()
+        if data is None:
+            return False
+        count = self.fetchone_from_db_by_name("kernel_mods_strings", "count(*)")
+        if count > 0:
+            strings = self.fetchall_from_db_by_name("kernel_mods_strings", "string")
+        else:
+            debug.info("[time-consuming task] extracting strings... (kernel module name={0} base=0x{1:x})".format(str(self.kmod.BaseDllName  or ''), self.kmod.DllBase))
+            strings = list(set(self.util.extract_unicode(data) + self.util.extract_ascii(data)))
+            records = ((str(self.kmod.BaseDllName  or ''), string) for string in strings)
+            self.cur.executemany("insert or ignore into kernel_mods_strings values (?, ?)", records)
+
+        result = self.util.check_strings(strings, content, condition, preserve_case)
+        if result == False and condition == 'matches': # for searching binary sequences
+            pattern = self.util.make_regex(content, preserve_case)
+            if pattern.search(data) is not None:
+                result = True
+
+        return result
+
 class IOCParseError(Exception):
     pass
 
@@ -765,7 +958,7 @@ class IOC_Scanner:
         self.display_mode = False
         self.cur = None
         self._config = None
-        self.items = {'Process':None, 'Registry':None, 'Service':None}
+        self.items = {'Process':None, 'Registry':None, 'Service':None, 'Driver':None}
         self.checked_results = {} # for repeatedly checked Items except ProcessItem
 
     def __len__(self):
@@ -820,17 +1013,17 @@ class IOC_Scanner:
         self.cur = cur
         self._config = _config
 
-    def withproc(self, iocid):
+    def with_item(self, iocid, name):
         ioc_obj = self.iocs[iocid]
         ioc_logic = ioc_obj.root.xpath('.//criteria')[0]
-        if len(ioc_logic.xpath('//Context[@document="ProcessItem"]')) > 0:
+        if len(ioc_logic.xpath('//Context[@document="{0}Item"]'.format(name))) > 0:
             return True
         else:
             return False
 
-    def withproc_all(self):
+    def with_item_all(self, name):
         for iocid in self.iocs:
-            if self.withproc(iocid):
+            if self.with_item(iocid, name):
                 return True
         return False
 
@@ -862,20 +1055,20 @@ class IOC_Scanner:
         item_name = document[:-4] # fetch '*' from '*Item'
         if not item_name in self.items.keys():
             debug.error('{0} not supported in this plugin'.format(document))
-        if item_name != 'Process' and self.items[item_name] is None:
+        if item_name != 'Process' and item_name != 'Driver' and self.items[item_name] is None:
             self.items[item_name] = eval('{0}(self.cur, self._config)'.format(document))
         if not method in dir(self.items[item_name]):
             debug.error('{0} not supported in this plugin'.format(search))
 
-        if item_name != 'Process' and search in self.checked_results.keys():
-            debug.debug('reusing result for repeated ProcessItem')
+        if item_name != 'Process' and item_name != 'Driver' and search in self.checked_results.keys():
+            debug.debug('reusing result for repeated ProcessItem/DriverItem')
             iocResult = self.checked_results[search]
         else:
             iocResult = eval('self.items["{0}"].{1}(r"{2}","{3}","{4}")'.format(item_name, method, content, condition, preserve_case))
             #if negate == 'true' and iocResult == True:
             if negate == 'true':
                 iocResult = not iocResult
-        if item_name != 'Process' and search not in self.checked_results.keys():
+        if item_name != 'Process' and item_name != 'Driver' and search not in self.checked_results.keys():
             self.checked_results[search] = iocResult
 
         if is_last_item:
@@ -931,7 +1124,7 @@ class IOC_Scanner:
                 # should never get here
                 raise IOCParseError('node is not a Indicator/IndicatorItem')
 
-    def scan(self, iocid, process):
+    def scan(self, iocid, process, kmod):
         result = ''
 
         if len(self) < 1:
@@ -940,6 +1133,8 @@ class IOC_Scanner:
 
         if process is not None:
             self.items['Process'] = ProcessItem(process, self.cur, self._config)
+        if kmod is not None:
+            self.items['Driver'] = DriverItem(kmod, self.cur, self._config)
 
         ioc_obj = self.iocs[iocid]
         ioc_logic = ioc_obj.root.xpath('.//criteria')[0]
@@ -952,13 +1147,13 @@ class IOC_Scanner:
         self.walk_indicator(tlo)
         debug.debug(self.iocEvalString)
         if eval(self.iocEvalString):
-            #result += ('------------------------------------------------------\n')
-            result += ('IOC matched! short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid))
-            result += ('logic (matched item is red-colored):\n{0}'.format(self.iocLogicString))
+            result += 'IOC matched! short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid)
+            result += 'logic (matched item is red-colored):\n{0}'.format(self.iocLogicString)
         self.iocEvalString=""
         self.iocLogicString=""
 
         self.items['Process'] = None
+        self.items['Driver'] = None
         return result
 
     def display(self):
@@ -979,9 +1174,9 @@ class IOC_Scanner:
                 continue
 
             self.walk_indicator(tlo)
-            result += ('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
-            result += ('IOC definition short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid))
-            result += ('logic:\n{0}'.format(self.iocLogicString))
+            result += '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n'
+            result += 'IOC definition short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid)
+            result += 'logic:\n{0}'.format(self.iocLogicString)
             self.iocLogicString=""
 
         return result
@@ -1008,6 +1203,9 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
         self._config.add_option('cache_path', short_option = 'c', default = None,
                                help = 'Specify the cache folder path of analysis result',
                                action = 'store', type = 'str')
+        self._config.add_option('kmod', short_option = 'm', default = None,
+                               help = 'Operate on these kernel modules (comma-separated, case-insensitive)',
+                               action = 'store', type = 'str')
         self.db = None
         self.cur = None
         self.total_secs = 0
@@ -1025,6 +1223,7 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
 
     def clear_tables(self):
         debug.info("Loaded DB version is different from that of the script. Clearing the tables...")
+
         self.cur.execute("drop table if exists version")
         self.cur.execute("drop table if exists done")
         self.cur.execute("drop table if exists injected")
@@ -1035,23 +1234,36 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
         self.cur.execute("drop table if exists netinfo")
         self.cur.execute("drop table if exists hidden")
         self.cur.execute("drop table if exists dllpath")
+        self.cur.execute("drop table if exists api_hooked")
+
+        self.cur.execute("drop table if exists kernel_mods")
+        self.cur.execute("drop table if exists kernel_mods_impfunc")
+        self.cur.execute("drop table if exists kernel_mods_strings")
+
         self.cur.execute("drop table if exists regpath")
         self.cur.execute("drop table if exists shimcache")
         self.cur.execute("drop table if exists service")
 
     def make_tables(self):
         debug.info("Making new DB tables...")
+
         self.cur.execute("create table if not exists version(version unique)")
         self.cur.execute("insert into version values(?)", (g_version,))
-        self.cur.execute("create table if not exists done(pid unique, injected, strings, vaddump, impfunc, handles, netinfo, dllpath)")
+        self.cur.execute("create table if not exists done(pid unique, injected, strings, vaddump, impfunc, handles, netinfo, dllpath, api_hooked)")
         self.cur.execute("create table if not exists injected(pid, start, size)")
         self.cur.execute("create table if not exists strings(pid, string)")
         self.cur.execute("create table if not exists vaddump(pid unique, size)")
         self.cur.execute("create table if not exists impfunc(pid, iat, call, mod_name, func_name)")
         self.cur.execute("create table if not exists handles(pid, type, name)")
         self.cur.execute("create table if not exists netinfo(pid, protocol, laddr, lport, raddr, rport, state)")
-        self.cur.execute("create table if not exists hidden(pid unique, result, offset, path, arguments)")
+        self.cur.execute("create table if not exists hidden(pid unique, result, offset unique, path, arguments)")
         self.cur.execute("create table if not exists dllpath(pid, path)")
+        self.cur.execute("create table if not exists api_hooked(pid, mode, type, hooked_module, hooked_func)")
+
+        self.cur.execute("create table if not exists kernel_mods(offset unique, name unique, base, size, fullname)")
+        self.cur.execute("create table if not exists kernel_mods_impfunc(name, iat, call, mod_name, func_name)")
+        self.cur.execute("create table if not exists kernel_mods_strings(name, string)")
+
         self.cur.execute("create table if not exists regpath(path unique)")
         self.cur.execute("create table if not exists shimcache(path, modified)")
         self.cur.execute("create table if not exists service(service_name, display_name, bin_path)")
@@ -1137,6 +1349,35 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
             self.cur.executemany("insert or ignore into hidden values (?, ?, ?, ?, ?)", records)
             return procs
 
+    def extract_all_loaded_kernel_mods(self):
+        self.cur.execute("select count(*) from kernel_mods")
+        cnt = self.cur.fetchone()[0]
+        kernel_space = utils.load_as(self._config)
+
+        if cnt > 0:
+            self.cur.execute("select offset from kernel_mods")
+            return [obj.Object("_LDR_DATA_TABLE_ENTRY", offset = record[0], vm = kernel_space) for record in self.cur.fetchall()]
+        else:
+            # currently get kernel modules from linked list because the result of modscan is noisy. need to improve for hidden malicious modules in the future
+            debug.info("[time-consuming task] extracting all loaded kernel modules...")
+            mods = list(win32.modules.lsmod(kernel_space))
+            records = [(mod.obj_offset, str(mod.BaseDllName  or ''), mod.DllBase.v(), mod.SizeOfImage.v(), str(mod.FullDllName or '')) for mod in mods]
+            self.cur.executemany("insert or ignore into kernel_mods values (?, ?, ?, ?, ?)", records)
+            return mods
+
+    def filter_mods(self, mods):
+        if self._config.kmod is not None:
+            try:
+                modlist = [m.lower() for m in self._config.kmod.split(',')]
+            except ValueError:
+                debug.error("Invalid kmod option {0}".format(self._config.kmod))
+
+            filtered_mods = [mod for mod in mods if str(mod.BaseDllName  or '').lower() in modlist]
+            if len(filtered_mods) == 0:
+                debug.error("Cannot find kernel module {0}.".format(self._config.kmod))
+            return filtered_mods
+        return mods
+
     def calculate(self):
         # load IOCs
         scanner = IOC_Scanner()
@@ -1151,42 +1392,45 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
         else:
             self.init_db()
             scanner.prepare(self.cur, self._config)
-            procs = None
-            if scanner.withproc_all():
+            procs = [None]
+            kmods = [None]
+            if scanner.with_item_all('Process'):
                 procs = self.extract_all_active_procs()
                 # pre-generated process entries in db for all updated tasks (e.g., netinfo)
                 for process in self.filter_tasks(procs):
-                    self.cur.execute("insert or ignore into done values(?, ?, ?, ?, ?, ?, ?, ?)", (process.UniqueProcessId.v(), False, False, False, False, False, False, False))
+                    self.cur.execute("insert or ignore into done values(?, ?, ?, ?, ?, ?, ?, ?, ?)", (process.UniqueProcessId.v(), False, False, False, False, False, False, False, False))
+            if scanner.with_item_all('Driver'):
+                kmods = self.extract_all_loaded_kernel_mods()
+            if len(procs) > 1 and len(kmods) > 1:
+                debug.warning('Combination of ProcessItem and DriverItem will take too long time. If possible, define separately or specify PID/kmod.')
             for iocid in scanner.iocs:
-                if scanner.withproc(iocid):
+                for kmod in self.filter_mods(kmods):
                     for process in self.filter_tasks(procs):
                         with Timer() as t:
-                            result = scanner.scan(iocid, process)
-                        debug.debug("=> elasped scan: {0} s (pid{1})".format(t.secs, process.UniqueProcessId))
+                            result = scanner.scan(iocid, process, kmod)
+                        pid = ', pid={0}'.format(process.UniqueProcessId) if process is not None else ''
+                        kmod_name = ', kmod={0}'.format(str(kmod.BaseDllName  or '')) if kmod is not None else ''
+                        debug.debug("=> elapsed scan: {0}s{1}{2}\n".format(t.secs, kmod_name, pid))
                         self.total_secs += t.secs
                         if result != '':
-                            yield process, result
-                else:
-                    with Timer() as t:
-                        result = scanner.scan(iocid, None)
-                    debug.debug("=> elasped scan: {0} s".format(t.secs))
-                    self.total_secs += t.secs
-                    if result != '':
-                        yield None, result
+                            yield process, kmod, result
 
     def render_text(self, outfd, data):
         if self._config.show:
             for definitions in data:
-                outfd.write('\n' + definitions)
+                outfd.write(definitions)
+            outfd.write('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
         else:
-            for process, ioc_result in data:
+            for process, kmod, ioc_result in data:
                 outfd.write('***************************************************************\n')
                 outfd.write(ioc_result)
                 if process is not None:
                     outfd.write("Note: ProcessItem was evaluated only in {0} (Pid={1})\n".format(process.ImageFileName, process.UniqueProcessId))
+                if kmod is not None:
+                    outfd.write("Note: DriverItem was evaluated only in {0} (base=0x{1:x})\n".format(str(kmod.BaseDllName  or ''), kmod.DllBase))
+                outfd.write('***************************************************************\n')
 
             self.db.commit()
             self.cur.close()
-            outfd.write('***************************************************************\n')
-            debug.debug("=> elasped scan total: {0} s".format(self.total_secs))
+            debug.info("=> elapsed scan total: about {0} s".format(self.total_secs))
 

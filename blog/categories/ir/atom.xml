@@ -4,7 +4,7 @@
   <title><![CDATA[Category: IR | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/ir/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-08-26T11:06:59+09:00</updated>
+  <updated>2014-09-15T21:00:57+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -87,9 +87,9 @@
 
 <p><img src="/images/post/openioc_scan/2nd_run.jpg" alt="2nd_run" /></p>
 
-<h3>Supported Items (2014/8/20)</h3>
+<h3>Supported Items (2014/9/15)</h3>
 
-<p>I explain 20 items supported by openioc_scan. To make maximal use of openioc_scan, we had better newly add 4 item definitions <del>in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide). </del>  <strong>(2014/8/25)</strong> We can add new definitions on PyIOCe from Terms->Indicator Terms menu as follows:</p>
+<p>I explain 24 items supported by openioc_scan. <del>To make maximal use of openioc_scan, we had better newly add 4 item definitions in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide). </del>  <strong>(2014/8/25)</strong> We can add new definitions on PyIOCe from Terms->Indicator Terms menu as follows:</p>
 
 <p><img src="/images/post/openioc_scan/new_terms.jpg" alt="new_terms" /></p>
 
@@ -103,10 +103,11 @@
 <li><strong>ProcessItem/arguments</strong> &hellip; command line arguments</li>
 <li><strong>ProcessItem/hidden</strong> &hellip; process hidden by rootkit (e.g., DKOM). This item is based on part of <em>psxview</em> command, but dead process with exit time is excluded before evaluation.</li>
 <li><strong>ProcessItem/SectionList/MemorySection/Injected</strong> &hellip; process with potential section of injected or unpacked code based on <em>malfind</em> command</li>
-<li><strong>ProcessItem/StringList/string</strong> &hellip; strings or binary code sequences</li>
+<li><strong>ProcessItem/StringList/string</strong> &hellip; strings or binary code sequences in the process</li>
 <li><strong>ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string</strong> &hellip; imported function names based on <em>impscan</em>. The original command scans only base+SizeOfImage, so I added code injected section as scan target. This item doesn&rsquo;t work on wow64 process due to impscan&rsquo;s limitation.</li>
 <li><strong>ProcessItem/HandleList/Handle/Name, ProcessItem/HandleList/Handle/Type</strong> &hellip; process handle information based on <em>handles</em> command</li>
 <li><strong>ProcessItem/PortList/PortItem/localPort, ProcessItem/PortList/PortItem/remotePort, ProcessItem/PortList/PortItem/localIP, ProcessItem/PortList/PortItem/remoteIP</strong> &hellip; network information related to the process from the result of <em>netscan</em> command</li>
+<li><strong>ProcessItem/Hooked/API/FunctionName</strong> &hellip; IAT/EAT/Inline hooked API function name based on <em>apihooks</em> command &lt;&ndash; should be newly defined in *.iocterms</li>
 </ul>
 
 
@@ -124,6 +125,15 @@
 <li><strong>ServiceItem/name</strong> &hellip; service name</li>
 <li><strong>ServiceItem/descriptiveName</strong> &hellip; service description name</li>
 <li><strong>ServiceItem/cmdLine</strong> &hellip; command line of the service  &lt;&ndash; should be newly defined in *.iocterms</li>
+</ul>
+
+
+<h4>DriverItem</h4>
+
+<ul>
+<li><strong>DriverItem/DriverName</strong> &hellip; kernel driver name extracted from <em>lsmod</em> method (to be improved in the future)</li>
+<li><strong>DriverItem/PEInfo/ImportedModules/Module/ImportedFunctions/string</strong> &hellip; imported function names based on <em>impscan</em></li>
+<li><strong>DriverItem/StringList/string</strong> &hellip; strings or binary code sequences in the driver</li>
 </ul>
 
 
@@ -145,7 +155,7 @@
 
 <h3>Future Work</h3>
 
-<p>I&rsquo;ll add other useful items (e.g., DriverItem and HookItem). I welcome any feedbacks/requests.</p>
+<p>I&rsquo;ll add other useful items (e.g., <del>DriverItem</del> and HookItem). I welcome any feedbacks/requests.</p>
 
 <h3>Download</h3>
 
@@ -159,6 +169,7 @@
 <li><a href="/downloads/IOCs/v11/a50223b5-b213-43e9-beac-dfe9c1ca240c_rogue_svchost.ioc">rogue svchost</a></li>
 <li><a href="/downloads/IOCs/v11/7382c170-7e66-4d72-808e-5f703f39a38d_unusual_path.ioc">suspicious exec path</a></li>
 <li><a href="/downloads/IOCs/v11/cdcd5fdb-fcd3-4947-8c76-d2fbdc1b5f82_UAC.ioc">UAC pop-up bypassing</a></li>
+<li><a href="/downloads/IOCs/v11/2823537b-8c9a-454a-8bf4-3aa5ef76ec54_webinject.ioc">WebInject malware</a></li>
 </ul>
 
 ]]></content>
