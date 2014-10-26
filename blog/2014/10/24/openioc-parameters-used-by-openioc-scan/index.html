@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>CCI</title>
+  <title>OpenIOC Parameters used by openioc_scan - CCI</title>
   <meta name="author" content="Takahiro Haruyama (@cci_forensics)">
 
   
-  <meta name="description" content="Crap!! Looks like the page you&rsquo;re looking for doesn&rsquo;t exist. Just go home and try again! Recent Posts OpenIOC Parameters Used by &hellip;">
+  <meta name="description" content="&ldquo;Parameters&rdquo; introduced in OpenIOC 1.1 allows embedding additional metadata about Indicators into the IOC (in more detail, see Blackhat &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://TakahiroHaruyama.github.io/404.html">
+  <link rel="canonical" href="http://TakahiroHaruyama.github.io/blog/2014/10/24/openioc-parameters-used-by-openioc-scan">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="CCI" type="application/atom+xml">
@@ -94,18 +94,111 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
-  <h2>Crap!!</h2>
+  <header>
+    
+      <h1 class="entry-title">OpenIOC Parameters Used by Openioc_scan</h1>
+    
+    
+      <p class="meta">
+        
 
-<p>Looks like the page you&rsquo;re looking for doesn&rsquo;t exist. Just go <a href="/">home</a> and try again!</p>
+
+
+
+
+
+
 
   
-    <footer>
+
+
+<time datetime="2014-10-24T18:09:24+09:00" pubdate data-updated="true">Oct 24<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>&ldquo;Parameters&rdquo; introduced in OpenIOC 1.1 allows embedding additional metadata about Indicators into the IOC (in more detail, see <a href="https://media.blackhat.com/us-13/Arsenal/us-13-Gibb-IOCWriter_11-Slides.pdf">Blackhat 2013 presentation</a> by William Gibb). I implemented functions displaying matched content details and scoring results of indicator matching.</p>
+
+<!-- more -->
+
+
+<p>For using the new functions, you should define parameters in <a href="https://github.com/yahoo/PyIOCe">PyIOCe</a> written by Sean Gillespie. First, select [Modify Parameters] in Terms menu. Then add Context Type and Name/Value as below:</p>
+
+<p><img src="/images/post/openioc_parameters/pyIOCe_param_define.JPG" alt="define" /></p>
+
+<p>The Context Type should be lower-case because that of indicator items is &ldquo;volatility&rdquo;.</p>
+
+<p>Next, double-click any terms and add parameters.</p>
+
+<p><img src="/images/post/openioc_parameters/pyIOCe_param_add.JPG" alt="define" /></p>
+
+<p>The value of &ldquo;detail&rdquo; should be &ldquo;on&rdquo;. And you can set any integer value between 0 to 100 for &ldquo;score&rdquo; value. Openioc_scan displays an IOC if the evaluation of all IOC terms/logics is true, or the total score of matched terms including &ldquo;score&rdquo; parameter is greater than or equal to &ldquo;SCORE_THRESHOLD&rdquo; (the default value is 100).</p>
+
+<p>For instance, see the following result.</p>
+
+<p><img src="/images/post/openioc_parameters/pyIOCe_param_result.JPG" alt="result" /></p>
+
+<p>All indicator terms are combined with &ldquo;AND&rdquo; operator, but only 3 terms are matched, so the result without considering &ldquo;score&rdquo; parameter becomes False. However, openioc_scan says &ldquo;IOC matched&rdquo; because the total score is 100. We can check each score per term like &ldquo;(score=50;)&rdquo;. Similarly, we can refer to matched content detail for &ldquo;detail&rdquo; parameter by checking INFO logs above the IOC result.</p>
+
+<p>In this way, OpenIOC parameters enable to define more-informational and flexible IOCs. I will implement more functions using parameters in the future.</p>
+
+<h3>Download</h3>
+
+<p><a href="/downloads/scripts/openioc_scan.py">openioc_scan.py</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Takahiro Haruyama (@cci_forensics)</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-24T18:09:24+09:00" pubdate data-updated="true">Oct 24<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/forensics/'>Forensics</a>, <a class='category' href='/blog/categories/ir/'>IR</a>, <a class='category' href='/blog/categories/malware/'>Malware</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://TakahiroHaruyama.github.io/blog/2014/10/24/openioc-parameters-used-by-openioc-scan/" data-via="cci_forensics" data-counturl="http://TakahiroHaruyama.github.io/blog/2014/10/24/openioc-parameters-used-by-openioc-scan/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/" title="Previous Post: Fast Malware Triage using openioc_scan Volatility Plugin">&laquo; Fast Malware Triage using openioc_scan Volatility Plugin</a>
       
       
-    </footer>
-  
+    </p>
+  </footer>
 </article>
 
 </div>

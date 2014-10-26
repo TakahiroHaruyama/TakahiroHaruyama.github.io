@@ -42,7 +42,9 @@ colorama.init()
 
 g_version = '2014/09/26'
 g_cache_path = ''
+g_detail_on = False
 READ_BLOCKSIZE = 1024 * 1024 * 10
+SCORE_THRESHOLD = 100
 
 # copied from netscan
 AF_INET = 2
@@ -134,6 +136,8 @@ class ItemUtil:
         if condition == 'matches':
             pattern = self.make_regex(content, preserve_case)
             if pattern.search(target) is not None:
+                if g_detail_on:
+                    debug.info('matched detail: {0}'.format(target))
                 return True
         else:
             #if isinstance(target, unicode):
@@ -144,15 +148,23 @@ class ItemUtil:
                 content = content.lower()
             if condition == 'is':
                 if target == content:
+                    if g_detail_on:
+                        debug.info('matched detail: {0}'.format(target))
                     return True
             elif condition == 'contains':
                 if target.find(content) != -1:
+                    if g_detail_on:
+                        debug.info('matched detail: {0}'.format(target))
                     return True
             elif condition == 'starts-with':
                 if target.startswith(content):
+                    if g_detail_on:
+                        debug.info('matched detail: {0}'.format(target))
                     return True
             elif condition == 'ends-with':
                 if target.endswith(content):
+                    if g_detail_on:
+                        debug.info('matched detail: {0}'.format(target))
                     return True
         return False
 
@@ -1208,7 +1220,8 @@ class IOC_Scanner:
         self.cur = None
         self._config = None
         self.items = {'Process':None, 'Registry':None, 'Service':None, 'Driver':None, 'Hook':None}
-        self.checked_results = {} # for repeatedly checked Items except ProcessItem
+        self.checked_results = {} # for repeatedly checked Items except ProcessItem and DriverItem
+        self.total_score = 0
 
     def __len__(self):
         return len(self.iocs)
@@ -1276,8 +1289,10 @@ class IOC_Scanner:
                 return True
         return False
 
-    def check_indicator_item(self, node, is_last_item):
+    def check_indicator_item(self, node, params, is_last_item):
         iocResult = False
+        global g_detail_on
+        score = 0
 
         condition = node.get('condition')
         preserve_case = node.get('preserve-case')
@@ -1288,10 +1303,29 @@ class IOC_Scanner:
         content = node.findtext('Content')
         logicOperator = str(node.getparent().get("operator")).lower()
 
+        theid = node.get('id')
+        param_desc = ''
+        param_cnt = 0
+        for refid, name, value in params:
+            if theid == refid:
+                if name == 'detail' and value == 'on':
+                    g_detail_on = True
+                    param_cnt += 1
+                elif name == 'score':
+                    score += int(value)
+                    param_cnt += 1
+        if param_cnt > 0:
+            param_desc = ' ('
+            if g_detail_on:
+                param_desc += 'detail=on;'
+            if score > 0:
+                param_desc += 'score={0};'.format(score)
+            param_desc += ')'
+
         if negate == 'true':
-            item_desc = 'Not ' + search + ' ' + condition + ' ' + content
+            item_desc = 'Not ' + search + ' ' + condition + ' ' + content + param_desc
         else:
-            item_desc = search + ' ' + condition + ' ' + content
+            item_desc = search + ' ' + condition + ' ' + content + param_desc
 
         if self.display_mode:
             if is_last_item:
@@ -1325,16 +1359,20 @@ class IOC_Scanner:
             self.iocEvalString += ' ' + str(iocResult)
             if iocResult:
                 self.iocLogicString += '  '*self.level + colorama.Fore.RED + item_desc + colorama.Fore.RESET + '\n'
+                self.total_score += score
             else:
                 self.iocLogicString += '  '*self.level + item_desc + '\n'
         else:
             self.iocEvalString += ' ' + str(iocResult) + ' ' + str(logicOperator)
             if iocResult:
                 self.iocLogicString += '  '*self.level + colorama.Fore.RED + item_desc + colorama.Fore.RESET + '\n' + '  '*self.level + str(logicOperator) + '\n'
+                self.total_score += score
             else:
                 self.iocLogicString += '  '*self.level + item_desc + '\n' + '  '*self.level + str(logicOperator) + '\n'
 
-    def walk_indicator(self, node):
+        g_detail_on = False
+
+    def walk_indicator(self, node, params):
         expected_tag = 'Indicator'
         if node.tag != expected_tag:
             raise ValueError('node expected tag is [{0}]'.format(expected_tag))
@@ -1344,9 +1382,9 @@ class IOC_Scanner:
 
             if chn.tag == 'IndicatorItem':
                 if chn == node.getchildren()[-1]:
-                    self.check_indicator_item(chn, True)
+                    self.check_indicator_item(chn, params, True)
                 else:
-                    self.check_indicator_item(chn, False)
+                    self.check_indicator_item(chn, params, False)
 
             elif chn.tag == 'Indicator':
                 operator = chn.get('operator').lower()
@@ -1357,7 +1395,7 @@ class IOC_Scanner:
                 self.iocLogicString += '  '*self.level + '(\n'
                 self.level+=1
 
-                self.walk_indicator(chn)
+                self.walk_indicator(chn, params)
 
                 self.level-=1
                 logicOperator = str(node.getparent().get("operator")).lower()
@@ -1374,6 +1412,23 @@ class IOC_Scanner:
                 # should never get here
                 raise IOCParseError('node is not a Indicator/IndicatorItem')
 
+    def walk_parameter(self, node):
+        expected_tag = 'parameters'
+        if node.tag != expected_tag:
+            raise ValueError('walk_parameter: node expected tag is [{0}]'.format(expected_tag))
+
+        params = []
+        for chn in node.getchildren():
+            if chn.tag != 'param':
+                raise ValueError('walk_parameter: chn expected tag is [param]')
+            #theid = chn.get('id')
+            refid = chn.get('ref-id')
+            name = chn.get('name')
+            value = chn.findtext('value')
+            params.append((refid, name, value))
+
+        return params
+
     def scan(self, iocid, process, kmod):
         result = ''
 
@@ -1387,6 +1442,15 @@ class IOC_Scanner:
             self.items['Driver'] = DriverItem(kmod, self.cur, self._config)
 
         ioc_obj = self.iocs[iocid]
+
+        try:
+            ioc_params = ioc_obj.root.xpath('.//parameters')[0]
+            #params = ioc_params.getchildren()[0]
+        except IndexError, e:
+            debug.debug('Could not find children for the top level parameters/children nodes for IOC [{0}]'.format(str(iocid)))
+        else:
+            params = self.walk_parameter(ioc_params)
+
         ioc_logic = ioc_obj.root.xpath('.//criteria')[0]
         try:
             tlo = ioc_logic.getchildren()[0]
@@ -1394,13 +1458,17 @@ class IOC_Scanner:
             debug.warning('Could not find children for the top level criteria/children nodes for IOC [{0}]'.format(str(iocid)))
             return result
 
-        self.walk_indicator(tlo)
+        self.walk_indicator(tlo, params)
         debug.debug(self.iocEvalString)
         if eval(self.iocEvalString):
-            result += 'IOC matched! short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid)
+            result += 'IOC matched (by logic)! short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid)
+            result += 'logic (matched item is red-colored):\n{0}'.format(self.iocLogicString)
+        elif self.total_score >= SCORE_THRESHOLD:
+            result += 'IOC matched (by score)! short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid)
             result += 'logic (matched item is red-colored):\n{0}'.format(self.iocLogicString)
         self.iocEvalString=""
         self.iocLogicString=""
+        self.total_score = 0
 
         self.items['Process'] = None
         self.items['Driver'] = None

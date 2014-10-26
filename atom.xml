@@ -4,7 +4,7 @@
   <title><![CDATA[CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-09-30T18:52:58+09:00</updated>
+  <updated>2014-10-26T21:33:20+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -12,6 +12,42 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[OpenIOC Parameters used by openioc_scan]]></title>
+    <link href="http://TakahiroHaruyama.github.io/blog/2014/10/24/openioc-parameters-used-by-openioc-scan/"/>
+    <updated>2014-10-24T18:09:24+09:00</updated>
+    <id>http://TakahiroHaruyama.github.io/blog/2014/10/24/openioc-parameters-used-by-openioc-scan</id>
+    <content type="html"><![CDATA[<p>&ldquo;Parameters&rdquo; introduced in OpenIOC 1.1 allows embedding additional metadata about Indicators into the IOC (in more detail, see <a href="https://media.blackhat.com/us-13/Arsenal/us-13-Gibb-IOCWriter_11-Slides.pdf">Blackhat 2013 presentation</a> by William Gibb). I implemented functions displaying matched content details and scoring results of indicator matching.</p>
+
+<!-- more -->
+
+
+<p>For using the new functions, you should define parameters in <a href="https://github.com/yahoo/PyIOCe">PyIOCe</a> written by Sean Gillespie. First, select [Modify Parameters] in Terms menu. Then add Context Type and Name/Value as below:</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_parameters/pyIOCe_param_define.JPG" alt="define" /></p>
+
+<p>The Context Type should be lower-case because that of indicator items is &ldquo;volatility&rdquo;.</p>
+
+<p>Next, double-click any terms and add parameters.</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_parameters/pyIOCe_param_add.JPG" alt="define" /></p>
+
+<p>The value of &ldquo;detail&rdquo; should be &ldquo;on&rdquo;. And you can set any integer value between 0 to 100 for &ldquo;score&rdquo; value. Openioc_scan displays an IOC if the evaluation of all IOC terms/logics is true, or the total score of matched terms including &ldquo;score&rdquo; parameter is greater than or equal to &ldquo;SCORE_THRESHOLD&rdquo; (the default value is 100).</p>
+
+<p>For instance, see the following result.</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_parameters/pyIOCe_param_result.JPG" alt="result" /></p>
+
+<p>All indicator terms are combined with &ldquo;AND&rdquo; operator, but only 3 terms are matched, so the result without considering &ldquo;score&rdquo; parameter becomes False. However, openioc_scan says &ldquo;IOC matched&rdquo; because the total score is 100. We can check each score per term like &ldquo;(score=50;)&rdquo;. Similarly, we can refer to matched content detail for &ldquo;detail&rdquo; parameter by checking INFO logs above the IOC result.</p>
+
+<p>In this way, OpenIOC parameters enable to define more-informational and flexible IOCs. I will implement more functions using parameters in the future.</p>
+
+<h3>Download</h3>
+
+<p><a href="http://TakahiroHaruyama.github.io/downloads/scripts/openioc_scan.py">openioc_scan.py</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Fast Malware Triage using openioc_scan Volatility Plugin]]></title>
