@@ -43,6 +43,8 @@ colorama.init()
 g_version = '2014/09/26'
 g_cache_path = ''
 g_detail_on = False
+g_color_term = colorama.Fore.MAGENTA
+g_color_detail = colorama.Fore.CYAN
 READ_BLOCKSIZE = 1024 * 1024 * 10
 SCORE_THRESHOLD = 100
 
@@ -133,11 +135,13 @@ class ItemUtil:
         return pattern
 
     def check_string(self, target, content, condition, preserve_case):
+        #out = colorama.Style.BRIGHT + g_color_detail + target + colorama.Fore.RESET + colorama.Style.RESET_ALL
+        out = g_color_detail + target + colorama.Fore.RESET
         if condition == 'matches':
             pattern = self.make_regex(content, preserve_case)
             if pattern.search(target) is not None:
                 if g_detail_on:
-                    debug.info('matched detail: {0}'.format(target))
+                    print('matched IOC term detail: {0}'.format(out))
                 return True
         else:
             #if isinstance(target, unicode):
@@ -149,22 +153,22 @@ class ItemUtil:
             if condition == 'is':
                 if target == content:
                     if g_detail_on:
-                        debug.info('matched detail: {0}'.format(target))
+                        print('matched IOC term detail: {0}'.format(out))
                     return True
             elif condition == 'contains':
                 if target.find(content) != -1:
                     if g_detail_on:
-                        debug.info('matched detail: {0}'.format(target))
+                        print('matched IOC term detail: {0}'.format(out))
                     return True
             elif condition == 'starts-with':
                 if target.startswith(content):
                     if g_detail_on:
-                        debug.info('matched detail: {0}'.format(target))
+                        print('matched IOC term detail: {0}'.format(out))
                     return True
             elif condition == 'ends-with':
                 if target.endswith(content):
                     if g_detail_on:
-                        debug.info('matched detail: {0}'.format(target))
+                        print('matched IOC term detail: {0}'.format(out))
                     return True
         return False
 
@@ -1358,14 +1362,14 @@ class IOC_Scanner:
         if is_last_item:
             self.iocEvalString += ' ' + str(iocResult)
             if iocResult:
-                self.iocLogicString += '  '*self.level + colorama.Fore.RED + item_desc + colorama.Fore.RESET + '\n'
+                self.iocLogicString += '  '*self.level + colorama.Style.BRIGHT + g_color_term + '>>> ' + item_desc + colorama.Fore.RESET + colorama.Style.RESET_ALL + '\n'
                 self.total_score += score
             else:
                 self.iocLogicString += '  '*self.level + item_desc + '\n'
         else:
             self.iocEvalString += ' ' + str(iocResult) + ' ' + str(logicOperator)
             if iocResult:
-                self.iocLogicString += '  '*self.level + colorama.Fore.RED + item_desc + colorama.Fore.RESET + '\n' + '  '*self.level + str(logicOperator) + '\n'
+                self.iocLogicString += '  '*self.level + colorama.Style.BRIGHT + g_color_term + '>>> '  + item_desc + colorama.Fore.RESET + colorama.Style.RESET_ALL + '\n' + '  '*self.level + str(logicOperator) + '\n'
                 self.total_score += score
             else:
                 self.iocLogicString += '  '*self.level + item_desc + '\n' + '  '*self.level + str(logicOperator) + '\n'
@@ -1462,10 +1466,10 @@ class IOC_Scanner:
         debug.debug(self.iocEvalString)
         if eval(self.iocEvalString):
             result += 'IOC matched (by logic)! short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid)
-            result += 'logic (matched item is red-colored):\n{0}'.format(self.iocLogicString)
+            result += 'logic (matched item is magenta-colored):\n{0}'.format(self.iocLogicString)
         elif self.total_score >= SCORE_THRESHOLD:
             result += 'IOC matched (by score)! short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid)
-            result += 'logic (matched item is red-colored):\n{0}'.format(self.iocLogicString)
+            result += 'logic (matched item is magenta-colored):\n{0}'.format(self.iocLogicString)
         self.iocEvalString=""
         self.iocLogicString=""
         self.total_score = 0
