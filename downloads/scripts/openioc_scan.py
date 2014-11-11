@@ -1488,6 +1488,15 @@ class IOC_Scanner:
 
         for iocid in self.iocs:
             ioc_obj = self.iocs[iocid]
+
+            try:
+                ioc_params = ioc_obj.root.xpath('.//parameters')[0]
+                #params = ioc_params.getchildren()[0]
+            except IndexError, e:
+                debug.debug('Could not find children for the top level parameters/children nodes for IOC [{0}]'.format(str(iocid)))
+            else:
+                params = self.walk_parameter(ioc_params)
+
             ioc_logic = ioc_obj.root.xpath('.//criteria')[0]
             try:
                 tlo = ioc_logic.getchildren()[0]
@@ -1495,7 +1504,7 @@ class IOC_Scanner:
                 debug.warning('Could not find children for the top level criteria/children nodes for IOC [{0}]'.format(str(iocid)))
                 continue
 
-            self.walk_indicator(tlo)
+            self.walk_indicator(tlo, params)
             result += '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n'
             result += 'IOC definition short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid)
             result += 'logic:\n{0}'.format(self.iocLogicString)
