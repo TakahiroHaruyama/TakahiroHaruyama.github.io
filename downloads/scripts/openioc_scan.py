@@ -319,7 +319,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind, apihooks.Ap
             if len(data) == 0:
                 continue
             elif len(data) > READ_BLOCKSIZE:
-                debug.warning('data size in VAD is more than READ_BLOCKSIZE (pid{0})'.format(self.process.UniqueProcessId))
+                debug.debug('data size in VAD is more than READ_BLOCKSIZE (pid{0})'.format(self.process.UniqueProcessId))
             extracted = list(set(self.util.extract_unicode(data) + self.util.extract_ascii(data)))
             strings.extend(extracted)
 
@@ -1640,17 +1640,19 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
 
     def parse_cmdline(self, process):
         debug.debug(process.ImageFileName)
-        #if str(process.ImageFileName) != "System":
-        if (str(process.ImageFileName) != "System") and (not isinstance(process.Peb, obj.NoneObject)):
+        #if (str(process.ImageFileName) != "System") and (not isinstance(process.Peb, obj.NoneObject)):
+        if not isinstance(process.Peb.ProcessParameters.CommandLine.v(), obj.NoneObject):
+            debug.debug('Hi pid={0}'.format(process.UniqueProcessId))
             cmdline = str(process.Peb.ProcessParameters.CommandLine).lower()
             debug.debug('name="{0}", cmdline="{1}" (pid{2})'.format(process.ImageFileName, cmdline or None, process.UniqueProcessId))
             if cmdline is not None:
                 name_idx = cmdline.find(str(process.ImageFileName).lower())
                 debug.debug('name_idx={0}'.format(name_idx))
                 if name_idx != -1:
-                    exe_idx = cmdline.find('.exe', name_idx)
-                    debug.debug("name='{0}', path='{1}', arg='{2}' (pid{3})".format(process.ImageFileName, cmdline[:exe_idx+4].strip('" '), cmdline[exe_idx+4:].strip('" '), process.UniqueProcessId))
-                    return cmdline[:exe_idx+4].strip('" '), cmdline[exe_idx+4:].strip('" ')
+                    a = re.search(r'\.exe|\.msi|\.ocx|\.dll|\.cab|\.cat|\.js|\.vbs|\.scr', cmdline) # any other?
+                    if a is not None:
+                        debug.debug("name='{0}', path='{1}', arg='{2}' (pid{3})".format(process.ImageFileName, cmdline[:a.end()].strip('" '), cmdline[a.end():].strip('" '), process.UniqueProcessId))
+                        return cmdline[:a.end()].strip('" '), cmdline[a.end():].strip('" ')
         return 'none', 'none'
 
     # based on psxview
@@ -1663,11 +1665,16 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
         procs = []
         if carved > 0:
             self.cur.execute("select offset from hidden")
-            return [self.virtual_process_from_physical_offset(kernel_space, record[0]) for record in self.cur.fetchall()]
+            for record in self.cur.fetchall():
+                if isinstance(self.virtual_process_from_physical_offset(kernel_space, record[0]), obj.NoneObject):
+                    procs.append(obj.Object("_EPROCESS", offset = record[0], vm = flat_space))
+                else:
+                    procs.append(self.virtual_process_from_physical_offset(kernel_space, record[0]))
+            #return [self.virtual_process_from_physical_offset(kernel_space, record[0]) for record in self.cur.fetchall()]
             #return [obj.Object("_EPROCESS", offset = record[0], vm = flat_space) for record in self.cur.fetchall()]
             #return [obj.Object("_EPROCESS", offset = record[0], vm = kernel_space) for record in self.cur.fetchall()]
         else:
-            debug.info("[time-consuming task] extracting all processes including hidden ones...")
+            debug.info("[time-consuming task] extracting all processes including hidden/dead ones...")
             all_tasks = list(tasks.pslist(kernel_space))
             ps_sources = {}
             ps_sources['pslist'] = self.check_pslist(all_tasks)
@@ -1683,18 +1690,25 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
                 for offset in source.keys():
                     if offset not in seen_offsets:
                         seen_offsets.append(offset)
-                        if source[offset].ExitTime != 0: # exclude dead process even if it is included in process list
+                        #if source[offset].ExitTime != 0: # exclude dead process even if it is included in process list
                         #if (source[offset].ExitTime != 0) and (not ps_sources['pslist'].has_key(offset)): # exclude dead process not included in process list <- cannot resolve from ethread!
-                            continue
+                        #    continue
+                        if isinstance(self.virtual_process_from_physical_offset(kernel_space, offset), obj.NoneObject):
+                            ep = obj.Object("_EPROCESS", offset = offset, vm = flat_space)
+                        else:
+                            ep = self.virtual_process_from_physical_offset(kernel_space, offset)
                         if source[offset].UniqueProcessId not in pids: # cross view in crashdump file seems to be buggy (duplicated processes) :-(
                             result = not (ps_sources['pslist'].has_key(offset) and ps_sources['psscan'].has_key(offset) and ps_sources['pspcid'].has_key(offset))
-                            path, arguments = self.parse_cmdline(source[offset])
-                            records.append((source[offset].UniqueProcessId.v(), bool(result), offset, path, arguments))
-                            procs.append(source[offset])
-                            pids.append(source[offset].UniqueProcessId)
+                            if result == True and source[offset].ExitTime != 0:
+                                # I checked there were some dead processes without exit time, but I don't know other methods to judge them...
+                                result = False
+                            path, arguments = self.parse_cmdline(ep)
+                            records.append((ep.UniqueProcessId.v(), bool(result), offset, path, arguments))
+                            procs.append(ep)
+                            pids.append(ep.UniqueProcessId)
             self.cur.executemany("insert or ignore into hidden values (?, ?, ?, ?, ?)", records)
             debug.debug('{0} procs carved'.format(len(procs)))
-            return procs
+        return procs
 
     def extract_all_loaded_kernel_mods(self):
         self.cur.execute("select count(*) from kernel_mods")
@@ -1743,6 +1757,7 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
             kmods = [None]
             if scanner.with_item_all('Process'):
                 procs = self.extract_all_active_procs()
+                #print procs
                 # pre-generated process entries in db for all updated tasks (e.g., netinfo)
                 for process in self.filter_tasks(procs):
                     self.cur.execute("insert or ignore into done values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (process.UniqueProcessId.v(), False, False, False, False, False, False, False, False, False))
