@@ -20,6 +20,7 @@ import volatility.plugins.modscan as modscan
 import volatility.plugins.filescan as filescan
 import volatility.plugins.privileges as privileges
 import volatility.plugins.ssdt as ssdt
+import volatility.plugins.mftparser as mftparser
 import volatility.plugins.malware.malfind as malfind
 import volatility.plugins.malware.impscan as impscan
 import volatility.plugins.malware.psxview as psxview
@@ -40,7 +41,7 @@ from ioc_writer import ioc_api
 import colorama
 colorama.init()
 
-g_version = '2014/09/26'
+g_version = '2014/11/14'
 g_cache_path = ''
 g_detail_on = False
 g_color_term = colorama.Fore.MAGENTA
@@ -377,7 +378,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind, apihooks.Ap
                 if len(data) == 0:
                     continue
                 elif len(data) > READ_BLOCKSIZE:
-                    debug.warning('data size in VAD is more than READ_BLOCKSIZE (pid{0})'.format(self.process.UniqueProcessId))
+                    debug.debug('data size in VAD is more than READ_BLOCKSIZE (pid{0})'.format(self.process.UniqueProcessId))
                 if pattern.search(data) is not None:
                     result = True
                 f.write(data)
@@ -1209,6 +1210,122 @@ class HookItem(ssdt.SSDT):
             syscall_names = self.extract_SSDT_hooked_functions()
         return self.util.check_strings(syscall_names, content, condition, preserve_case)
 
+class FileItem(mftparser.MFTParser):
+    def __init__(self, cur, _config):
+        self.cur = cur
+        self._config = _config
+        self.kernel_space = utils.load_as(self._config)
+        self.flat_space = utils.load_as(self._config, astype = 'physical')
+        self.util = ItemUtil()
+
+    # based on mftparser
+    def extract_MFT_entries(self, is_inode=False, is_name=False, is_extension=False, is_path=False, is_size=False):
+        debug.info("[time-consuming task] extracting NTFS MFT entries...")
+        records = []
+
+        # added for default option values (mftparser)
+        self._config.MACHINE = ""
+        self._config.OFFSET = None
+        self._config.ENTRYSIZE = 1024
+        self._config.DEBUGOUT = False
+        self._config.NOCHECK = False
+
+        for offset, mft_entry, attributes in mftparser.MFTParser.calculate(self):
+            full = ""
+            for a, i in attributes:
+                size = -1
+                if a.startswith("FILE_NAME"):
+                    if hasattr(i, "ParentDirectory"):
+                        name = mft_entry.remove_unprintable(i.get_name()) or "(Null)"
+                        if len(name.split('.')) > 1:
+                            ext = name.split('.')[-1]
+                        else:
+                            ext = ''
+                        full = mft_entry.get_full_path(i)
+                        size = int(i.RealFileSize)
+                        debug.debug('NTFS file info from MFT entry $FN: name={0}, ext={1}, full={2}'.format(name, ext, full))
+                        records.append((offset, mft_entry.RecordNumber.v(), name, ext, full, size))
+
+        if len(records) == 0:
+            records.append((0, 0, 'dummy', 'dummy', 'dummy', 0)) # insert dummy for done
+        self.cur.executemany("insert or ignore into files values (?, ?, ?, ?, ?, ?)", records)
+
+        if is_inode:
+            return [record[1] for record in records]
+        elif is_name:
+            return [record[2] for record in records]
+        elif is_extension:
+            return [record[3] for record in records]
+        elif is_path:
+            return [record[4] for record in records]
+        elif is_size:
+            return [record[5] for record in records]
+
+    def INode(self, content, condition, preserve_case):
+        if not self.util.is_condition_integer(condition):
+            debug.error('{0} condition is not supported in FileItem/INode'.format(condition))
+            return False
+
+        ent_nums = []
+        count = self.util.fetchone_from_db(self.cur, "files", "count(*)")
+        if count > 0:
+            ent_nums = self.util.fetchall_from_db(self.cur, "files", "inode")
+        else:
+            ent_nums = self.extract_MFT_entries(is_inode=True)
+        return self.util.check_integers(ent_nums, content, condition, preserve_case)
+
+    def FileName(self, content, condition, preserve_case):
+        if not self.util.is_condition_string(condition):
+            debug.error('{0} condition is not supported in FileItem/FileName'.format(condition))
+            return False
+
+        names = []
+        count = self.util.fetchone_from_db(self.cur, "files", "count(*)")
+        if count > 0:
+            names = self.util.fetchall_from_db(self.cur, "files", "name")
+        else:
+            names = self.extract_MFT_entries(is_name=True)
+        return self.util.check_strings(names, content, condition, preserve_case)
+
+    def FileExtension(self, content, condition, preserve_case):
+        if not self.util.is_condition_string(condition):
+            debug.error('{0} condition is not supported in FileItem/FileExtension'.format(condition))
+            return False
+
+        exts = []
+        count = self.util.fetchone_from_db(self.cur, "files", "count(*)")
+        if count > 0:
+            exts = self.util.fetchall_from_db(self.cur, "files", "extension")
+        else:
+            exts = self.extract_MFT_entries(is_extension=True)
+        return self.util.check_strings(exts, content, condition, preserve_case)
+
+    def FullPath(self, content, condition, preserve_case):
+        if not self.util.is_condition_string(condition):
+            debug.error('{0} condition is not supported in FileItem/FullPath'.format(condition))
+            return False
+
+        paths = []
+        count = self.util.fetchone_from_db(self.cur, "files", "count(*)")
+        if count > 0:
+            paths = self.util.fetchall_from_db(self.cur, "files", "path")
+        else:
+            paths = self.extract_MFT_entries(is_path=True)
+        return self.util.check_strings(paths, content, condition, preserve_case)
+
+    def SizeInBytes(self, content, condition, preserve_case):
+        if not self.util.is_condition_integer(condition):
+            debug.error('{0} condition is not supported in FileItem/SizeInBytes'.format(condition))
+            return False
+
+        sizes = []
+        count = self.util.fetchone_from_db(self.cur, "files", "count(*)")
+        if count > 0:
+            sizes = self.util.fetchall_from_db(self.cur, "files", "size")
+        else:
+            sizes = self.extract_MFT_entries(is_size=True)
+        return self.util.check_integers(sizes, content, condition, preserve_case)
+
 class IOCParseError(Exception):
     pass
 
@@ -1223,7 +1340,7 @@ class IOC_Scanner:
         self.display_mode = False
         self.cur = None
         self._config = None
-        self.items = {'Process':None, 'Registry':None, 'Service':None, 'Driver':None, 'Hook':None}
+        self.items = {'Process':None, 'Registry':None, 'Service':None, 'Driver':None, 'Hook':None, 'File':None}
         self.checked_results = {} # for repeatedly checked Items except ProcessItem and DriverItem
         self.total_score = 0
 
@@ -1610,6 +1727,7 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
         self.cur.execute("create table if not exists shimcache(path, modified)")
         self.cur.execute("create table if not exists service(service_name, display_name, bin_path)")
         self.cur.execute("create table if not exists ssdt_hooked(table_idx, entry_idx, syscall_ptr, syscall_name, hooking_mod_name, inline_hooked)")
+        self.cur.execute("create table if not exists files(offset, inode, name, extension, path, size)")
 
     def init_db(self):
         global g_cache_path

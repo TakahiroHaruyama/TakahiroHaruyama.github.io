@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Forensics | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/forensics/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-11-13T12:52:21+09:00</updated>
+  <updated>2014-11-14T16:39:54+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -45,7 +45,7 @@
 
 <h3>Download</h3>
 
-<p><a href="/downloads/scripts/openioc_scan.py">openioc_scan.py</a></p>
+<p>You can download the script and term/parameter definitions from <a href="takahiroharuyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/">here</a></p>
 ]]></content>
   </entry>
   
@@ -133,9 +133,9 @@
 
 <p><img src="/images/post/openioc_scan/2nd_run.jpg" alt="2nd_run" /></p>
 
-<h3>Supported Terms (2014/9/29)</h3>
+<h3>Supported Terms (2014/11/14)</h3>
 
-<p>I show 29 terms supported by openioc_scan. <del>To make maximal use of openioc_scan, we had better newly add some term definitions in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide). </del>  <del><strong>(2014/8/25)</strong> We can add new definitions on PyIOCe from Terms->Indicator Terms menu as follows:</del> <strong>(2014/9/30)</strong> Sean added term import/export functions to PyIOCe. You can import <a href="/downloads/scripts/indicator_terms.volatility">the terms for Volatility</a> or PyIOCe with all Volatility terms may be released shortly. Thanks Sean!</p>
+<p>I show 34 terms supported by openioc_scan. <del>To make maximal use of openioc_scan, we had better newly add some term definitions in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide). </del>  <del><strong>(2014/8/25)</strong> We can add new definitions on PyIOCe from Terms->Indicator Terms menu as follows:</del> <strong>(2014/9/30)</strong> Sean added term import/export functions to PyIOCe. You can import <a href="/downloads/scripts/indicator_terms.volatility">the terms for Volatility</a> or PyIOCe with all Volatility terms may be released shortly. Thanks Sean!</p>
 
 <p><img src="/images/post/openioc_scan/new_terms.jpg" alt="new_terms" /></p>
 
@@ -194,6 +194,17 @@
 </ul>
 
 
+<h4>FileItem (5 Terms)</h4>
+
+<ul>
+<li><strong> FileItem/FileName (string)</strong> &hellip; file name extracted by <em>mftparser</em></li>
+<li><strong> FileItem/FileExtension (string)</strong> &hellip; file extension extracted by <em>mftparser</em></li>
+<li><strong> FileItem/INode (integer)</strong> &hellip; MFT entry number extracted by <em>mftparser</em></li>
+<li><strong> FileItem/FullPath (string)</strong> &hellip; file path extracted by <em>mftparser</em></li>
+<li><strong> FileItem/SizeInBytes (integer)</strong> &hellip; file size extracted by <em>mftparser</em></li>
+</ul>
+
+
 <h3>Examples</h3>
 
 <p>Using openioc_scan, we can detect malware based on our own rules. I show some examples for detecting PlugX type II/III and WebInject malware. About PlugX, see this <a href="https://www.blackhat.com/docs/asia-14/materials/Haruyama/Asia-14-Haruyama-I-Know-You-Want-Me-Unplugging-PlugX.pdf">presentation</a>. Actually, all IOCs are generic indicators, so they can be applied to other malware.</p>
@@ -216,11 +227,11 @@
 
 <h3>Future Work</h3>
 
-<p>I will support dead process / unloaded  or hidden driver terms in the future. I will also consider the term about auto-startup entries (e.g., registry Run keys) extracted from RAM. Scoring function using OpenIOC parameters may be implemented.</p>
+<p>I will support <del>dead process</del> / unloaded  or hidden driver terms in the future. <del>I will also consider the term about auto-startup entries (e.g., registry Run keys) extracted from RAM.</del> <del>Scoring function using OpenIOC parameters may be implemented.</del></p>
 
 <p>Any comments or feedback are welcome.</p>
 
-<h3>Download</h3>
+<h3>Download (latest:2014/11/14)</h3>
 
 <p><a href="/downloads/scripts/openioc_scan.py">openioc_scan.py</a></p>
 
@@ -236,7 +247,7 @@
 </ul>
 
 
-<p>Last but not least, here is <a href="/downloads/scripts/indicator_terms.volatility">Volatility terms of PyIOCe</a>.</p>
+<p>Last but not least, here are <a href="/downloads/scripts/indicator_terms.volatility">terms</a> and <a href="/downloads/scripts/parameters.volatility">parameters</a> of Volatility used in PyIOCe.</p>
 
 <p>Let me know if you have any question or problem. Enjoy ;&ndash;)</p>
 ]]></content>
