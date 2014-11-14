@@ -4,7 +4,7 @@
   <title><![CDATA[CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-11-14T16:39:54+09:00</updated>
+  <updated>2014-11-14T16:41:50+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -45,7 +45,7 @@
 
 <h3>Download</h3>
 
-<p>You can download the script and term/parameter definitions from <a href="takahiroharuyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/">here</a></p>
+<p>You can download the script and term/parameter definitions from <a href="http://takahiroharuyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/">here</a></p>
 ]]></content>
   </entry>
   
