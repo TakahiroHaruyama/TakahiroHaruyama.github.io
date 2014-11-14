@@ -174,10 +174,13 @@ class ItemUtil:
         return False
 
     def check_strings(self, target_list, content, condition, preserve_case):
+        result = False
         for target in target_list:
             if self.check_string(target, content, condition, preserve_case):
-                return True
-        return False
+                #return True
+                result = True
+        #return False
+        return result
 
     def extract_unicode(self, data):
         pat = re.compile(ur'(?:[\x20-\x7E][\x00]){4,}')
