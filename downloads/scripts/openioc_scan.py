@@ -406,6 +406,11 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind, apihooks.Ap
             imp_funcs = self.fetchall_from_db_by_pid('impfunc', 'func_name')
             return self.util.check_strings(imp_funcs, content, condition, preserve_case)
 
+        if not hasattr(self.process.obj_parent, 'ThreadsProcess'):
+            debug.warning('This process (pid={0}) seems to be dead. Skipping extraction of imported functions..'.format(self.process.UniqueProcessId))
+            self.update_done('impfunc')
+            return False
+
         debug.info("[time-consuming task] extracting import functions...(pid={0})".format(self.process.UniqueProcessId))
         scan_list = []
         all_mods = list(self.process.get_load_modules())
@@ -552,6 +557,7 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind, apihooks.Ap
             elif is_type:
                 return [record[1] for record in records]
 
+        self.update_done('handles')
         return None
 
     def HandleList_Handle_Name(self, content, condition, preserve_case):
