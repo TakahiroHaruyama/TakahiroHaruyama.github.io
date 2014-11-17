@@ -192,13 +192,13 @@ class ItemUtil:
 
     def check_integer(self, target, content, condition, preserve_case):
         if condition == 'is':
-            if target == int(content):
+            if target == content:
                 return True
         elif condition == 'greater-than':
-            if target > int(content):
+            if target > content:
                 return True
         elif condition == 'less-than':
-            if target < int(content):
+            if target < content:
                 return True
         return False
 
@@ -406,12 +406,12 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind, apihooks.Ap
             imp_funcs = self.fetchall_from_db_by_pid('impfunc', 'func_name')
             return self.util.check_strings(imp_funcs, content, condition, preserve_case)
 
-        if not hasattr(self.process.obj_parent, 'ThreadsProcess'):
+        debug.info("[time-consuming task] extracting imported functions...(pid={0})".format(self.process.UniqueProcessId))
+        if self.process._vol_vm == self.flat_space:
             debug.warning('This process (pid={0}) seems to be dead. Skipping extraction of imported functions..'.format(self.process.UniqueProcessId))
             self.update_done('impfunc')
             return False
 
-        debug.info("[time-consuming task] extracting import functions...(pid={0})".format(self.process.UniqueProcessId))
         scan_list = []
         all_mods = list(self.process.get_load_modules())
         if all_mods is not None and len(all_mods) > 0:
@@ -1251,7 +1251,8 @@ class FileItem(mftparser.MFTParser):
                         else:
                             ext = ''
                         full = mft_entry.get_full_path(i)
-                        size = int(i.RealFileSize)
+                        #size = int(i.RealFileSize)
+                        size = str(i.RealFileSize.v())
                         debug.debug('NTFS file info from MFT entry $FN: name={0}, ext={1}, full={2}'.format(name, ext, full))
                         records.append((offset, mft_entry.RecordNumber.v(), name, ext, full, size))
 
@@ -1268,7 +1269,8 @@ class FileItem(mftparser.MFTParser):
         elif is_path:
             return [record[4] for record in records]
         elif is_size:
-            return [record[5] for record in records]
+            #return [record[5] for record in records]
+            return [long(record[5]) for record in records]
 
     def INode(self, content, condition, preserve_case):
         if not self.util.is_condition_integer(condition):
