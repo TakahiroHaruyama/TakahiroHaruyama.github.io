@@ -393,6 +393,60 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind, apihooks.Ap
 
         return result
 
+    # based on impscan (overrided)
+    def _vicinity_scan(self, addr_space, calls_imported, apis, base_address, data_len, forward, injected):
+
+        sortedlist = calls_imported.keys()
+        sortedlist.sort()
+
+        if not sortedlist:
+            return
+
+        size_of_address = addr_space.profile.get_obj_size("address")
+
+        if forward:
+            start_addr = sortedlist[0]
+        else:
+            start_addr = sortedlist[len(sortedlist) - 1]
+
+        if injected:
+            # searching dynamically generated IAT
+            threshold = 0x400
+            if not forward:
+                start_addr += 0x1000
+        else:
+            threshold = 5
+        i = 0
+
+        while threshold and i < 0x2000:
+            if forward:
+                next_addr = start_addr + (i * size_of_address)
+            else:
+                next_addr = start_addr - (i * size_of_address)
+
+            debug.debug('next_addr {0:x} (threshold={1})'.format(next_addr, threshold))
+            call_dest = obj.Object("address", offset = next_addr,
+                            vm = addr_space).v()
+
+            #if (not call_dest or call_dest < base_address or call_dest > base_address + data_len):
+            if (not call_dest or (call_dest > base_address and call_dest < base_address + data_len)):
+                debug.debug('continued {0:x}:{1:x}'.format(next_addr, call_dest))
+                threshold -= 1
+                i += 1
+                continue
+
+            if call_dest in apis and call_dest not in calls_imported:
+                debug.debug('found {0:x}:{1:x}'.format(next_addr, call_dest))
+                calls_imported[next_addr] = call_dest
+                if injected:
+                    threshold = 0x400
+                else:
+                    threshold = 5
+            else:
+                threshold -= 1
+
+            i += 1
+
     # based on impscan
     def SectionList_MemorySection_PEInfo_ImportedModules_Module_ImportedFunctions_string(self, content, condition, preserve_case):
         result = False
@@ -415,18 +469,19 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind, apihooks.Ap
         scan_list = []
         all_mods = list(self.process.get_load_modules())
         if all_mods is not None and len(all_mods) > 0:
-            scan_list.append([all_mods[0].DllBase, all_mods[0].SizeOfImage]) # start, size
+            scan_list.append((all_mods[0].DllBase, all_mods[0].SizeOfImage, False)) # start, size, injected
         # add injected memory regions
         (done,) = self.check_done('injected')
         if int(done):
             self.cur.execute("select start, size from injected where pid = ?", (self.process.UniqueProcessId.v(),))
             records = self.cur.fetchall()
             if records is not None:
-                scan_list.extend(records)
+                scan_list.extend([(start, size, True) for start, size in records])
         else:
-            scan_list.extend(self.detect_code_injections())
+            scan_list.extend([(start, size, True) for start, size in self.detect_code_injections()])
 
-        for base_address, size_to_read in scan_list:
+        debug.debug(scan_list)
+        for base_address, size_to_read, injected in scan_list:
             addr_space = self.process.get_process_address_space()
             if not addr_space:
                 debug.warning("SectionList_MemorySection_PEInfo_ImportedModules_Module_ImportedFunctions_string: Cannot acquire process AS")
@@ -438,12 +493,12 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind, apihooks.Ap
                     for (_, iat, call) in self.call_scan(addr_space, base_address, data)
                     if call in apis
                     )
-            self._vicinity_scan(addr_space,
-                    calls_imported, apis, base_address, len(data),
-                    forward = True)
-            self._vicinity_scan(addr_space,
-                    calls_imported, apis, base_address, len(data),
-                    forward = False)
+            if injected:
+                self._vicinity_scan(addr_space, calls_imported, apis, base_address, len(data), True, True)
+                self._vicinity_scan(addr_space, calls_imported, apis, base_address, len(data), False, True)
+            else:
+                self._vicinity_scan(addr_space, calls_imported, apis, base_address, len(data), True, False)
+                self._vicinity_scan(addr_space, calls_imported, apis, base_address, len(data), False, False)
             for iat, call in sorted(calls_imported.items()):
                 mod_name, func_name = self._original_import(str(apis[call][0].BaseDllName or ''), apis[call][1])
                 self.cur.execute("insert into impfunc values (?, ?, ?, ?, ?)", (self.process.UniqueProcessId.v(), iat, call, mod_name, func_name))
