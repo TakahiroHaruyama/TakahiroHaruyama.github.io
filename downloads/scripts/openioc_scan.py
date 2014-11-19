@@ -1509,6 +1509,7 @@ class IOC_Scanner:
         if node.tag != expected_tag:
             raise ValueError('node expected tag is [{0}]'.format(expected_tag))
 
+        debug.debug('entering walk_indicator: {0}={1}'.format(node.get('id'), node.get('operator')))
         for chn in node.getchildren():
             chn_id = chn.get('id')
 
@@ -1519,6 +1520,7 @@ class IOC_Scanner:
                     self.check_indicator_item(chn, params, False)
 
             elif chn.tag == 'Indicator':
+                debug.debug('parent id=operator: {0}={1}'.format(chn.getparent().get('id'), chn.getparent().get('operator')))
                 operator = chn.get('operator').lower()
                 if operator not in ['or', 'and']:
                     raise IOCParseError('Indicator@operator is not AND/OR. [{0}] has [{1}]'.format(chn_id, operator) )
@@ -1530,9 +1532,10 @@ class IOC_Scanner:
                 self.walk_indicator(chn, params)
 
                 self.level-=1
-                logicOperator = str(node.getparent().get("operator")).lower()
-                if logicOperator == 'none': # maybe top
-                    logicOperator = 'or'
+                #logicOperator = str(node.getparent().get("operator")).lower()
+                logicOperator = str(chn.getparent().get("operator")).lower()
+                #if logicOperator == 'none': # maybe top
+                #    logicOperator = 'or'
                 if chn == node.getchildren()[-1]:
                     self.iocLogicString += '  '*self.level + ')\n'
                     self.iocEvalString += ' )'
