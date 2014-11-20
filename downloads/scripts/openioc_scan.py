@@ -126,13 +126,16 @@ class ItemUtil:
             return False
 
     def make_regex(self, content, preserve_case):
-        content_ur = ur'{0}'.format(content)
+        #content_ur = ur'{0}'.format(content)
+        #content_r = r'{0}'.format(content)
         if preserve_case == 'true':
             #pattern = re.compile(content.decode('ascii'), re.UNICODE)
-            pattern = re.compile(content_ur, re.UNICODE)
+            #pattern = re.compile(content_ur, re.DOTALL | re.UNICODE)
+            pattern = re.compile(content, re.DOTALL)
         else:
             #pattern = re.compile(content.decode('ascii'), re.IGNORECASE | re.UNICODE)
-            pattern = re.compile(content_ur, re.IGNORECASE | re.UNICODE)
+            #pattern = re.compile(content_ur, re.DOTALL | re.IGNORECASE | re.UNICODE)
+            pattern = re.compile(content, re.DOTALL | re.IGNORECASE)
         return pattern
 
     def check_string(self, target, content, condition, preserve_case):
@@ -145,9 +148,6 @@ class ItemUtil:
                     print('matched IOC term detail: {0}'.format(out))
                 return True
         else:
-            #if isinstance(target, unicode):
-            #    debug.info('unicode converted')
-            #    content = unicode(content)
             if preserve_case == 'false':
                 target = target.lower()
                 content = content.lower()
@@ -399,7 +399,9 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind, apihooks.Ap
         sortedlist = calls_imported.keys()
         sortedlist.sort()
 
+        debug.debug('_vicinity_scan: base={0:x}'.format(base_address))
         if not sortedlist:
+            debug.debug('sortedlist:None')
             return
 
         size_of_address = addr_space.profile.get_obj_size("address")
@@ -1493,6 +1495,7 @@ class IOC_Scanner:
         theid = node.get('id')
         param_desc = ''
         param_cnt = 0
+        note = ''
         for refid, name, value in params:
             if theid == refid:
                 if name == 'detail' and value == 'on':
@@ -1501,12 +1504,17 @@ class IOC_Scanner:
                 elif name == 'score':
                     score += int(value)
                     param_cnt += 1
+                elif name == 'note':
+                    param_cnt += 1
+                    note = value
         if param_cnt > 0:
             param_desc = ' ('
             if g_detail_on:
                 param_desc += 'detail=on;'
             if score > 0:
                 param_desc += 'score={0};'.format(score)
+            if note != '':
+                param_desc += 'note="{0}";'.format(note)
             param_desc += ')'
 
         if negate == 'true':
@@ -1656,6 +1664,9 @@ class IOC_Scanner:
         elif self.total_score >= SCORE_THRESHOLD:
             result += 'IOC matched (by score)! short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid)
             result += 'logic (matched item is magenta-colored):\n{0}'.format(self.iocLogicString)
+        elif self._config.test:
+            result += '[Test Mode for improving IOC] short_desc="{0}" id={1}\n'.format(ioc_obj.metadata.findtext('.//short_description'), iocid)
+            result += 'logic (matched item is magenta-colored):\n{0}'.format(self.iocLogicString)
         self.iocEvalString=""
         self.iocLogicString=""
         self.total_score = 0
@@ -1723,6 +1734,9 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
         self._config.add_option('kmod', short_option = 'm', default = None,
                                help = 'Operate on these kernel module names (comma-separated, case-insensitive)',
                                action = 'store', type = 'str')
+        self._config.add_option('test', short_option = 't', default = False,
+                               help = 'display all scan results for improving IOC',
+                               action = 'store_true')
         self.db = None
         self.cur = None
         self.total_secs = 0
