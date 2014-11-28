@@ -46,6 +46,7 @@ g_cache_path = ''
 g_detail_on = False
 g_color_term = colorama.Fore.MAGENTA
 g_color_detail = colorama.Fore.CYAN
+g_sus_path_p = re.compile(r'\\ProgramData|\\\$Recycle\.Bin|\\Windows\\Temp|\\Users\\All Users|\\Users\\Default|\\Users\\Public|\\Users\\.*\\AppData', re.IGNORECASE)
 READ_BLOCKSIZE = 1024 * 1024 * 10
 SCORE_THRESHOLD = 100
 
@@ -126,15 +127,9 @@ class ItemUtil:
             return False
 
     def make_regex(self, content, preserve_case):
-        #content_ur = ur'{0}'.format(content)
-        #content_r = r'{0}'.format(content)
         if preserve_case == 'true':
-            #pattern = re.compile(content.decode('ascii'), re.UNICODE)
-            #pattern = re.compile(content_ur, re.DOTALL | re.UNICODE)
             pattern = re.compile(content, re.DOTALL)
         else:
-            #pattern = re.compile(content.decode('ascii'), re.IGNORECASE | re.UNICODE)
-            #pattern = re.compile(content_ur, re.DOTALL | re.IGNORECASE | re.UNICODE)
             pattern = re.compile(content, re.DOTALL | re.IGNORECASE)
         return pattern
 
@@ -471,7 +466,21 @@ class ProcessItem(impscan.ImpScan, netscan.Netscan, malfind.Malfind, apihooks.Ap
         scan_list = []
         all_mods = list(self.process.get_load_modules())
         if all_mods is not None and len(all_mods) > 0:
+            # add the process image region
             scan_list.append((all_mods[0].DllBase, all_mods[0].SizeOfImage, False)) # start, size, injected
+
+        # add suspicious DLL regions based on ldrmodules
+        p = re.compile(r'')
+        for vad, address_space in self.process.get_vads(vad_filter = self.process._mapped_file_filter):
+            if obj.Object("_IMAGE_DOS_HEADER", offset = vad.Start, vm = address_space).e_magic != 0x5A4D:
+                continue
+            path = str(vad.FileObject.FileName or 'none').lower()
+            if g_sus_path_p.search(path) is not None:
+                entry = (vad.Start, vad.Length, False)
+                if entry not in scan_list: # exclude exe
+                    debug.info('add suspicious dll to scan_list: {0}'.format(path))
+                    scan_list.append(entry)
+
         # add injected memory regions
         (done,) = self.check_done('injected')
         if int(done):
