@@ -985,7 +985,8 @@ class DriverItem(impscan.ImpScan, devicetree.DriverIrp, callbacks.Callbacks, tim
         base_addr = self.kmod.DllBase
         debug.debug("fetchall: {0} already done. Results reused (name={1}, base=0x{2:x})".format(table, name, base_addr))
         sql = "select {0} from {1} where base = ?".format(column, table)
-        self.cur.execute(sql, (base_addr.v(),))
+        #self.cur.execute(sql, (base_addr.v(),))
+        self.cur.execute(sql, (str(base_addr.v()),)) # for unsigned long ("OverflowError: Python int too large to convert to SQLite INTEGER")
         return [record[0] for record in self.cur.fetchall()]
 
     def fetchone_from_db_by_base(self, table, column):
@@ -993,7 +994,8 @@ class DriverItem(impscan.ImpScan, devicetree.DriverIrp, callbacks.Callbacks, tim
         base_addr = self.kmod.DllBase
         debug.debug("fetchone: {0} from {1} (name={2}, base=0x{3:x})".format(column, table, name, base_addr))
         sql = "select {0} from {1} where base = ?".format(column, table)
-        self.cur.execute(sql, (base_addr.v(),))
+        #self.cur.execute(sql, (base_addr.v(),))
+        self.cur.execute(sql, (str(base_addr.v()),))
         return self.cur.fetchone()[0]
 
     def DriverName(self, content, condition, preserve_case):
@@ -1058,7 +1060,8 @@ class DriverItem(impscan.ImpScan, devicetree.DriverIrp, callbacks.Callbacks, tim
             records = []
             for iat, call in sorted(calls_imported.items()):
                 mod_name, func_name = self._original_import(str(apis[call][0].BaseDllName or ''), apis[call][1])
-                records.append((self.kmod.DllBase.v(), iat, call, mod_name, func_name))
+                #records.append((self.kmod.DllBase.v(), iat, call, mod_name, func_name))
+                records.append((str(self.kmod.DllBase.v()), str(iat), str(call), mod_name, func_name))
                 imp_funcs.append(func_name)
             self.cur.executemany("insert or ignore into kernel_mods_impfunc values (?, ?, ?, ?, ?)", records)
 
@@ -1078,7 +1081,8 @@ class DriverItem(impscan.ImpScan, devicetree.DriverIrp, callbacks.Callbacks, tim
         else:
             debug.info("[time-consuming task] extracting strings... (kernel module name={0} base=0x{1:x})".format(str(self.kmod.BaseDllName  or ''), self.kmod.DllBase))
             strings = list(set(self.util.extract_unicode(data) + self.util.extract_ascii(data)))
-            records = ((self.kmod.DllBase.v(), string) for string in strings)
+            #records = ((self.kmod.DllBase.v(), string) for string in strings)
+            records = ((str(self.kmod.DllBase.v()), string) for string in strings)
             self.cur.executemany("insert or ignore into kernel_mods_strings values (?, ?)", records)
 
         result = self.util.check_strings(strings, content, condition, preserve_case)
@@ -1114,7 +1118,8 @@ class DriverItem(impscan.ImpScan, devicetree.DriverIrp, callbacks.Callbacks, tim
                     module_name = str(module.BaseDllName or '')
                 else:
                     module_name = "Unknown"
-                records.append((driver.DriverStart.v(), MAJOR_FUNCTIONS[i], function.v(), module_name))
+                #records.append((driver.DriverStart.v(), MAJOR_FUNCTIONS[i], function.v(), module_name))
+                records.append((str(driver.DriverStart.v()), str(MAJOR_FUNCTIONS[i]), str(function.v()), module_name))
 
         self.cur.executemany("insert or ignore into kernel_mods_irp values (?, ?, ?, ?)", records)
         return [record[3] for record in records if self.kmod.DllBase.v() == record[0]]
@@ -1146,7 +1151,8 @@ class DriverItem(impscan.ImpScan, devicetree.DriverIrp, callbacks.Callbacks, tim
         for (sym, cb, detail), mods, mod_addrs in callbacks.Callbacks.calculate(self):
             module = tasks.find_module(mods, mod_addrs, mods.values()[0].obj_vm.address_mask(cb))
             type_name = '{0}'.format(sym)
-            records.append((module.DllBase.v(), type_name, cb.v(), str(detail or "-")))
+            #records.append((module.DllBase.v(), type_name, cb.v(), str(detail or "-")))
+            records.append((str(module.DllBase.v()), type_name, str(cb.v()), str(detail or "-")))
 
         if len(records) == 0:
             records.append(('dummy', 'dummy', 'dummy', 'dummy')) # insert dummy for done
@@ -1180,7 +1186,8 @@ class DriverItem(impscan.ImpScan, devicetree.DriverIrp, callbacks.Callbacks, tim
             else:
                 signaled = "-"
             due_time = "{0:#010x}:{1:#010x}".format(timer.DueTime.HighPart, timer.DueTime.LowPart)
-            records.append((module.DllBase.v(), timer.obj_offset, due_time, timer.Period.v(), signaled, timer.Dpc.DeferredRoutine.v()))
+            #records.append((module.DllBase.v(), timer.obj_offset, due_time, timer.Period.v(), signaled, timer.Dpc.DeferredRoutine.v()))
+            records.append((str(module.DllBase.v()), str(timer.obj_offset), due_time, timer.Period.v(), signaled, str(timer.Dpc.DeferredRoutine.v())))
 
         if len(records) == 0:
             records.append(('dummy', 'dummy', 'dummy', 'dummy', 'dummy', 'dummy')) # insert dummy for done
@@ -1932,8 +1939,12 @@ class OpenIOC_Scan(psxview.PsXview, taskmods.DllList):
             # currently get kernel modules from linked list because the result of modscan is noisy. need to improve for hidden malicious modules in the future
             debug.info("[time-consuming task] extracting all loaded kernel modules...")
             mods = list(win32.modules.lsmod(kernel_space))
-            records = [(mod.obj_offset, str(mod.BaseDllName  or ''), mod.DllBase.v(), mod.SizeOfImage.v(), str(mod.FullDllName or '')) for mod in mods]
+            #records = [(mod.obj_offset, str(mod.BaseDllName  or ''), mod.DllBase.v(), mod.SizeOfImage.v(), str(mod.FullDllName or '')) for mod in mods]
+            records = [(str(mod.obj_offset), str(mod.BaseDllName  or ''), str(mod.DllBase.v()), mod.SizeOfImage.v(), str(mod.FullDllName or '')) for mod in mods]
             self.cur.executemany("insert or ignore into kernel_mods values (?, ?, ?, ?, ?)", records)
+            #for record in records:
+            #    print record
+            #    self.cur.execute("insert or ignore into kernel_mods values (?, ?, ?, ?, ?)", record)
             return mods
 
     def filter_mods(self, mods):
