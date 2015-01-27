@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<OpenIOC xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="2823537b-8c9a-454a-8bf4-3aa5ef76ec54" last-modified="2014-09-05T06:20:20Z" published-date="0001-01-01T00:00:00" xmlns="http://openioc.org/schemas/OpenIOC_1.1">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<OpenIOC xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="2823537b-8c9a-454a-8bf4-3aa5ef76ec54" last-modified="2014-09-17T06:08:20Z" published-date="0001-01-01T00:00:00" xmlns="http://openioc.org/schemas/OpenIOC_1.1">
   <metadata>
     <short_description>WebInject</short_description>
-    <description>PyIOCe Generated IOC</description>
+    <description>WebInject malware (e.g., ZeuS, Citadel)</description>
     <authored_by>PyIOCe</authored_by>
     <authored_date>2014-09-01T08:21:19</authored_date>
     <links />

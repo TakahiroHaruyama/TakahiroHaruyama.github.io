@@ -5,11 +5,14 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Memory Forensics: still aborted - CCI</title>
+  <title>DFRWS EU Slide Deck and Generic IOCs - CCI</title>
   <meta name="author" content="Takahiro Haruyama (@cci_forensics)">
 
   
-  <meta name="description" content="2 years ago, I talked about the anti memory forensic method by modifying Windows kernel data structure on victim systems at BlackHat Europe 2012. The &hellip;">
+  <meta name="description" content="My talk pdf about openioc_scan is here. And the generic IOCs are following: unusual paths running, shimcache
+Web Injection
+Code Injection
+Position &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +21,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://TakahiroHaruyama.github.io/blog/2014/04/21/memory-forensics-still-aborted">
+  <link rel="canonical" href="http://TakahiroHaruyama.github.io/blog/2015/01/19/dfrws-eu-slide-deck-and-generic-iocs">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="CCI" type="application/atom+xml">
@@ -98,7 +101,7 @@
   
   <header>
     
-      <h1 class="entry-title">Memory Forensics: Still Aborted</h1>
+      <h1 class="entry-title">DFRWS EU Slide Deck and Generic IOCs</h1>
     
     
       <p class="meta">
@@ -114,39 +117,27 @@
   
 
 
-<time datetime="2014-04-21T19:34:48+09:00" pubdate data-updated="true">Apr 21<span>st</span>, 2014</time>
+<time datetime="2015-01-19T17:27:49+09:00" pubdate data-updated="true">Jan 19<span>th</span>, 2015</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>2 years ago, I talked about the anti memory forensic method by modifying Windows kernel data structure on victim systems at <a href="http://www.blackhat.com/html/bh-eu-12/bh-eu-12-archives.html#haruyama">BlackHat Europe 2012</a>. The situation is still the same.</p>
+<div class="entry-content"><p>My talk pdf about <a href="http://takahiroharuyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/">openioc_scan</a> is <a href="">here</a>.</p>
 
-<!-- more -->
+<p>And the generic IOCs are following:</p>
 
+<ul>
+<li>unusual paths <a href="/downloads/IOCs/v11/7382c170-7e66-4d72-808e-5f703f39a38d_unusual_path.ioc">running</a>, <a href="/downloads/IOCs/v11/e747cd9d-2ed5-41fe-9e6a-64b49680eeca_unusual_path_shimcache.ioc">shimcache</a></li>
+<li><a href="/downloads/IOCs/v11/2823537b-8c9a-454a-8bf4-3aa5ef76ec54_webinject.ioc">Web Injection</a></li>
+<li><a href="/downloads/IOCs/v11/4219a887-d10f-499f-a028-5c459b9c83d5_code_injection.ioc">Code Injection</a></li>
+<li>Position Independent Code <a href="/downloads/IOCs/v11/2b5527f3-e5c4-4f0b-b9fc-bcd2221c313c_PIC_PEB.ioc">PEB only</a>, <a href="/downloads/IOCs/v11/7cf5ca41-5e20-4ff0-8fa4-23510b04485a_PIC.ioc">PEB/GetPC/APIhash</a></li>
+<li><a href="/downloads/IOCs/v11/cdcd5fdb-fcd3-4947-8c76-d2fbdc1b5f82_UAC.ioc">UAC pop-up bypassing</a></li>
+<li>Using NTFS $EA <a href="/downloads/IOCs/v11/b61f88d5-9453-469b-94cd-c5ef59c972db_ntfsEA_proc.ioc">process</a>, <a href="/downloads/IOCs/v11/840ae4e7-41eb-4132-a5fe-48c910d99b96_ntfsEA_driver.ioc">driver</a></li>
+<li>Lateral Movement in Targeted Attack <a href="/downloads/IOCs/v11/710ec573-0b07-40a0-94b6-912af3272b08_LateralMovement_process.ioc">process</a>, <a href="/downloads/IOCs/v11/b78501b8-9aca-4eda-857f-cc409e269259_LateralMovement_file_reg.ioc">file/registry</a></li>
+</ul>
 
-<h3>Abort Factors and PoC Driver</h3>
-
-<p>In the past presentation, I showed &ldquo;Abort Factors&rdquo;, they are key structures for virtual address translation, guessing OS version and listing kernel objects. Once they are modified, memory analysis tools cannot continue to analyze images.</p>
-
-<p><img src="/images/post/amf/AbortFactors.jpg" alt="AbortFactors" /></p>
-
-<p>Today, I re-evaluated memory analysis tools: Volatility Framework 2.3.1 and Mandiant Redline 1.11.1
-(now no one uses HBGary Responder, right?). I loaded the PoC driver modifying abort factors again then acquired the RAM. Unfortunately, the results were the same as those two years ago. I could not extract any information from the image.</p>
-
-<p><img src="/images/post/amf/aborted_volatility.jpg" alt="abort_vol" /></p>
-
-<p><img src="/images/post/amf/aborted_redline.jpg" alt="abort_red" /></p>
-
-<h3>Countermeasures</h3>
-
-<p>As I explained in the slides, the countermeasures are simple.</p>
-
-<p>The tools should keep their guessings at a minimum. For instance, support a crash dump format. A crash dump includes CR3 register value, so tools need not guess kernel DTB (Directory Table Base). If CR3 value is modified, BSOD always occurs. Besides, allow users to specify OS versions.
-Volatility Framework already support the options. In that sense, Volatility is better than Redline.</p>
-
-<p>On the other hand, Redline (Memoryze) is better than Volatility in terms of the kernel object listing (e.g., pslist command) because it doesn&rsquo;t depend on debug data structure like _DBGKD_DEBUG_DATA_HEADER64. However, Volatility users can use psscan instead of pslist. Therefore, it may be nothing more than a trivial risk.</p>
 </div>
 
 
@@ -169,12 +160,12 @@ Volatility Framework already support the options. In that sense, Volatility is b
   
 
 
-<time datetime="2014-04-21T19:34:48+09:00" pubdate data-updated="true">Apr 21<span>st</span>, 2014</time>
+<time datetime="2015-01-19T17:27:49+09:00" pubdate data-updated="true">Jan 19<span>th</span>, 2015</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/forensics/'>Forensics</a>
+    <a class='category' href='/blog/categories/forensics/'>Forensics</a>, <a class='category' href='/blog/categories/ir/'>IR</a>, <a class='category' href='/blog/categories/malware/'>Malware</a>
   
 </span>
 
@@ -183,7 +174,7 @@ Volatility Framework already support the options. In that sense, Volatility is b
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://TakahiroHaruyama.github.io/blog/2014/04/21/memory-forensics-still-aborted/" data-via="cci_forensics" data-counturl="http://TakahiroHaruyama.github.io/blog/2014/04/21/memory-forensics-still-aborted/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://TakahiroHaruyama.github.io/blog/2015/01/19/dfrws-eu-slide-deck-and-generic-iocs/" data-via="cci_forensics" data-counturl="http://TakahiroHaruyama.github.io/blog/2015/01/19/dfrws-eu-slide-deck-and-generic-iocs/" >Tweet</a>
   
   
   
@@ -192,10 +183,8 @@ Volatility Framework already support the options. In that sense, Volatility is b
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/03/27/id-slash-idapython-scripts-extracting-plugx-configs/" title="Previous Post: ID/IDAPython scripts extracting PlugX configs">&laquo; ID/IDAPython scripts extracting PlugX configs</a>
+        <a class="basic-alignment left" href="/blog/2014/10/24/openioc-parameters-used-by-openioc-scan/" title="Previous Post: OpenIOC Parameters used by openioc_scan">&laquo; OpenIOC Parameters used by openioc_scan</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/" title="Next Post: Fast Malware Triage using openioc_scan Volatility Plugin">Fast Malware Triage using openioc_scan Volatility Plugin &raquo;</a>
       
     </p>
   </footer>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Forensics | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/forensics/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2014-12-08T16:15:44+09:00</updated>
+  <updated>2015-01-27T17:31:00+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -12,6 +12,28 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[DFRWS EU Slide Deck and Generic IOCs]]></title>
+    <link href="http://TakahiroHaruyama.github.io/blog/2015/01/19/dfrws-eu-slide-deck-and-generic-iocs/"/>
+    <updated>2015-01-19T17:27:49+09:00</updated>
+    <id>http://TakahiroHaruyama.github.io/blog/2015/01/19/dfrws-eu-slide-deck-and-generic-iocs</id>
+    <content type="html"><![CDATA[<p>My talk pdf about <a href="http://takahiroharuyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/">openioc_scan</a> is <a href="">here</a>.</p>
+
+<p>And the generic IOCs are following:</p>
+
+<ul>
+<li>unusual paths <a href="/downloads/IOCs/v11/7382c170-7e66-4d72-808e-5f703f39a38d_unusual_path.ioc">running</a>, <a href="/downloads/IOCs/v11/e747cd9d-2ed5-41fe-9e6a-64b49680eeca_unusual_path_shimcache.ioc">shimcache</a></li>
+<li><a href="/downloads/IOCs/v11/2823537b-8c9a-454a-8bf4-3aa5ef76ec54_webinject.ioc">Web Injection</a></li>
+<li><a href="/downloads/IOCs/v11/4219a887-d10f-499f-a028-5c459b9c83d5_code_injection.ioc">Code Injection</a></li>
+<li>Position Independent Code <a href="/downloads/IOCs/v11/2b5527f3-e5c4-4f0b-b9fc-bcd2221c313c_PIC_PEB.ioc">PEB only</a>, <a href="/downloads/IOCs/v11/7cf5ca41-5e20-4ff0-8fa4-23510b04485a_PIC.ioc">PEB/GetPC/APIhash</a></li>
+<li><a href="/downloads/IOCs/v11/cdcd5fdb-fcd3-4947-8c76-d2fbdc1b5f82_UAC.ioc">UAC pop-up bypassing</a></li>
+<li>Using NTFS $EA <a href="/downloads/IOCs/v11/b61f88d5-9453-469b-94cd-c5ef59c972db_ntfsEA_proc.ioc">process</a>, <a href="/downloads/IOCs/v11/840ae4e7-41eb-4132-a5fe-48c910d99b96_ntfsEA_driver.ioc">driver</a></li>
+<li>Lateral Movement in Targeted Attack <a href="/downloads/IOCs/v11/710ec573-0b07-40a0-94b6-912af3272b08_LateralMovement_process.ioc">process</a>, <a href="/downloads/IOCs/v11/b78501b8-9aca-4eda-857f-cc409e269259_LateralMovement_file_reg.ioc">file/registry</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[OpenIOC Parameters used by openioc_scan]]></title>
@@ -411,64 +433,6 @@ Volatility Framework already support the options. In that sense, Volatility is b
 <p><img src="/images/post/NumberOfRuns.jpg" alt="1st_header" /></p>
 
 <p>In a crashdump acquired by winpmem, NumberOfRuns of _PHYSICAL_MEMORY_DESCRIPTOR64 includes &ldquo;PAGE&rdquo; (this value should be defined as qword, correct?). That&rsquo;s why the script fails in parsing the structure. I modified NumberOfRuns then could get the analysis result.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Some Old Stuffs]]></title>
-    <link href="http://TakahiroHaruyama.github.io/blog/2014/01/05/some-old-stuffs/"/>
-    <updated>2014-01-05T23:37:20+09:00</updated>
-    <id>http://TakahiroHaruyama.github.io/blog/2014/01/05/some-old-stuffs</id>
-    <content type="html"><![CDATA[<h3>IOCs for memory forensics</h3>
-
-<p>Never forget to configure &ldquo;advanced parameters&rdquo; (check String and the length is 4)</p>
-
-<ul>
-<li><a href="/downloads/IOCs/23592725-e7cb-4391-9148-2ce25b1ed00d.ioc">ZeroAccess</a> for kernel/user-mode variants</li>
-<li><a href="/downloads/IOCs/66132886-d06c-4612-b51d-031a1c9fbc30.ioc">Poison Ivy</a></li>
-<li><a href="/downloads/IOCs/c229d84e-3981-4c71-a16f-aa6a17b22c75.ioc">Zeus 2.x variants</a> including Citadel</li>
-<li><a href="/downloads/IOCs/42392189-6ef8-4869-bb2e-b457c3e05ba1.ioc">SpyEye 1.3.x</a></li>
-</ul>
-
-
-<h3>IDAPython script</h3>
-
-<ul>
-<li><a href="/downloads/scripts/Deobfuscating_SpyEye.zip">Deobfuscating_SpyEye</a> deobfuscate 4-byte hash values and strings</li>
-<li><a href="/downloads/scripts/zeus_string_decoder.py">zeus_string_decoder</a> decode strings in ZeuS binary</li>
-<li><a href="/downloads/scripts/fix_junk_pony.py">fix_junk_pony</a> modify PONY&rsquo;s junk code</li>
-</ul>
-
-
-<h3>Immunity Debugger script</h3>
-
-<ul>
-<li><a href="/downloads/scripts/immbone_nx.zip">immbone_nx</a> break on execute script on DEP environment (enable DEP and uncheck the option ignoring Memory access violation in the debugger settings)</li>
-<li><a href="/downloads/scripts/immbone.zip">immbone</a> break on execute script on non-DEP environment (disable DEP and uncheck the option ignoring single-step break in the debugger settings)</li>
-<li><a href="/downloads/scripts/blackmanta.py">blackmanta</a> slightly-changed version for Immunity Debugger v1.8</li>
-</ul>
-
-
-<h3>EnCase EnScript</h3>
-
-<ul>
-<li><a href="/downloads/scripts/CrashDumpAnalyzer_20110322.zip">CrashDumpAnalyzer</a> memory forensic EnScripts for MS crash dump</li>
-<li><a href="/downloads/scripts/RawImageAnalyzer_20110322.zip">RawImageAnalyzer</a> memory forensic EnScripts for raw memory dump</li>
-<li><a href="/downloads/scripts/Timeline_Report_v1.8.1_CCI_20120511.zip">Timeline_Report_v1.8.1_CCI</a> NTFS SI/FN timeline EnScript based on Geoff Black&rsquo;s timeline EnScript</li>
-<li><a href="/downloads/scripts/PFDCforPE.EnScript">PFDCforPE</a> parse/filter/detect/carve PE files</li>
-</ul>
-
-
-<h3>Others</h3>
-
-<ul>
-<li><a href="/downloads/scripts/amf_7x86.c">amf_7x86</a> PoC driver for anti memory forensics on Windows7</li>
-<li><a href="/downloads/scripts/amf_XPx86.c">amf_XPx86</a> PoC driver for anti memory forensics on WindowsXP</li>
-</ul>
-
-
-<!-- * [](downloads/scripts/) -->
-
 ]]></content>
   </entry>
   
