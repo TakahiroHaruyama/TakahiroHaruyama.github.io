@@ -4,7 +4,7 @@
   <title><![CDATA[Category: IR | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/ir/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2015-01-27T17:31:00+09:00</updated>
+  <updated>2015-01-27T17:36:31+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -18,7 +18,7 @@
     <link href="http://TakahiroHaruyama.github.io/blog/2015/01/19/dfrws-eu-slide-deck-and-generic-iocs/"/>
     <updated>2015-01-19T17:27:49+09:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2015/01/19/dfrws-eu-slide-deck-and-generic-iocs</id>
-    <content type="html"><![CDATA[<p>My talk pdf about <a href="http://takahiroharuyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/">openioc_scan</a> is <a href="">here</a>.</p>
+    <content type="html"><![CDATA[<p>My talk slides about <a href="http://takahiroharuyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/">openioc_scan</a> will be <a href="">here</a>.</p>
 
 <p>And the generic IOCs are following:</p>
 
