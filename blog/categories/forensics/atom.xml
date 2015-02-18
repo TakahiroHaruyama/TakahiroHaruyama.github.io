@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Forensics | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/forensics/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2015-02-18T13:03:24+09:00</updated>
+  <updated>2015-02-18T16:30:24+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -133,9 +133,9 @@
 
 <p><img src="/images/post/openioc_scan/2nd_run.jpg" alt="2nd_run" /></p>
 
-<h3>Supported Terms (2014/11/14)</h3>
+<h3>Supported Terms (2015/2/18)</h3>
 
-<p>I show 34 terms supported by openioc_scan. <del>To make maximal use of openioc_scan, we had better newly add some term definitions in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide). </del>  <del><strong>(2014/8/25)</strong> We can add new definitions on PyIOCe from Terms->Indicator Terms menu as follows:</del> <strong>(2014/9/30)</strong> Sean added term import/export functions to PyIOCe. You can import <a href="/downloads/scripts/indicator_terms.volatility">the terms for Volatility</a> or PyIOCe with all Volatility terms may be released shortly. Thanks Sean!</p>
+<p>I show 33 terms supported by openioc_scan. <del>To make maximal use of openioc_scan, we had better newly add some term definitions in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide). </del>  <del><strong>(2014/8/25)</strong> We can add new definitions on PyIOCe from Terms->Indicator Terms menu as follows:</del> <strong>(2014/9/30)</strong> Sean added term import/export functions to PyIOCe. You can import <a href="/downloads/scripts/indicator_terms.volatility">the terms for Volatility</a> or PyIOCe with all Volatility terms may be released shortly. Thanks Sean!</p>
 
 <p><img src="/images/post/openioc_scan/new_terms.jpg" alt="new_terms" /></p>
 
@@ -144,9 +144,10 @@
 <ul>
 <li><strong>ProcessItem/name (string)</strong> &hellip; process name (max 15 characters)</li>
 <li><strong>ProcessItem/ParentProcessName (string)</strong> &hellip; process name of the parent process</li>
-<li><strong>ProcessItem/path (string)</strong> &hellip; path in the command line of process</li>
+<li><strong><del>ProcessItem/path (string)</del></strong> &hellip; <del>path in the command line of process</del> (replaced by ProcessItem/cmdLIne)</li>
+<li><strong>ProcessItem/cmdLine (string)</strong> &hellip; process command line</li>
 <li><strong>ProcessItem/DllPath (string)</strong> &hellip; dll path loaded in process (base on <em>ldrmodules</em> command)</li>
-<li><strong>ProcessItem/arguments (string)</strong> &hellip; command line arguments</li>
+<li><strong><del>ProcessItem/arguments (string)</del></strong> &hellip; <del>command line arguments</del> (replaced by ProcessItem/cmdLIne)</li>
 <li><strong>ProcessItem/hidden (bool, should be &ldquo;true&rdquo; or &ldquo;false&rdquo;)</strong> &hellip; process hidden by rootkit (e.g., DKOM). This item is based on part of <em>psxview</em> command, but dead process with exit time is excluded before evaluation.</li>
 <li><strong>ProcessItem/SectionList/MemorySection/Injected (bool)</strong> &hellip; process with potential section of injected or unpacked code based on <em>malfind</em> command</li>
 <li><strong>ProcessItem/StringList/string (string)</strong> &hellip; strings or binary code sequences in the process</li>
