@@ -4,7 +4,7 @@
   <title><![CDATA[CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2015-02-24T19:13:44+09:00</updated>
+  <updated>2015-02-27T15:28:14+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -114,13 +114,13 @@
 
 <p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_scan/2nd_run.jpg" alt="2nd_run" /></p>
 
-<h3>Supported Terms (2015/2/24)</h3>
+<h3>Supported Terms (2015/2/26)</h3>
 
-<p>I show 35 terms supported by openioc_scan. <del>To make maximal use of openioc_scan, we had better newly add some term definitions in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide). </del>  <del><strong>(2014/8/25)</strong> We can add new definitions on PyIOCe from Terms->Indicator Terms menu as follows:</del> <strong>(2014/9/30)</strong> Sean added term import/export functions to PyIOCe. You can import <a href="http://TakahiroHaruyama.github.io/downloads/scripts/indicator_terms.volatility">the terms for Volatility</a> or PyIOCe with all Volatility terms may be released shortly. Thanks Sean!</p>
+<p>I show 36 terms supported by openioc_scan. <del>To make maximal use of openioc_scan, we had better newly add some term definitions in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide). </del>  <del><strong>(2014/8/25)</strong> We can add new definitions on PyIOCe from Terms->Indicator Terms menu as follows:</del> <strong>(2014/9/30)</strong> Sean added term import/export functions to PyIOCe. You can import <a href="http://TakahiroHaruyama.github.io/downloads/scripts/indicator_terms.volatility">the terms for Volatility</a> or PyIOCe with all Volatility terms may be released shortly. Thanks Sean!</p>
 
 <p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_scan/new_terms.jpg" alt="new_terms" /></p>
 
-<h4>ProcessItem (18 Terms)</h4>
+<h4>ProcessItem (19 Terms)</h4>
 
 <ul>
 <li><strong>ProcessItem/name (string)</strong> &hellip; process name (max 15 characters)</li>
@@ -132,6 +132,7 @@
 <li><strong><del>ProcessItem/arguments (string)</del></strong> &hellip; <del>command line arguments</del> (replaced by ProcessItem/cmdLIne)</li>
 <li><strong>ProcessItem/hidden (bool)</strong> &hellip; process hidden by rootkit (e.g., DKOM). This item is based on part of <em>psxview</em> command, but dead process with exit time is excluded before evaluation.</li>
 <li><strong>ProcessItem/SectionList/MemorySection/Injected (bool)</strong> &hellip; process with potential section of injected or unpacked code based on <em>malfind</em> command</li>
+<li><strong>ProcessItem/SectionList/MemorySection/InjectedHexPattern (string)</strong> &hellip; process with potential section of injected or unpacked code with specified hex pattern based on <em>malfind</em> command (matches condition only)</li>
 <li><strong>ProcessItem/StringList/string (string)</strong> &hellip; strings or binary code sequences in the process</li>
 <li><strong>ProcessItem/SectionList/MemorySection/PEInfo/ImportedModules/Module/ImportedFunctions/string (string)</strong> &hellip; imported function names based on <em>impscan</em>. The original command scans only base+SizeOfImage of the executable, so I added code-injected sections and DLLs with suspicious paths (e.g., &ldquo;\$Recycle.Bin&rdquo;) as scan target. This item doesn&rsquo;t work on wow64 process due to impscan&rsquo;s limitation.</li>
 <li><strong>ProcessItem/HandleList/Handle/Name (string), ProcessItem/HandleList/Handle/Type (string)</strong> &hellip; process handle information based on <em>handles</em> command</li>
