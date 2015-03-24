@@ -4,7 +4,7 @@
   <title><![CDATA[Category: IR | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/ir/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2015-02-27T15:28:14+09:00</updated>
+  <updated>2015-03-24T10:38:13+00:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[OpenIOC Parameters used by openioc_scan]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2014/10/24/openioc-parameters-used-by-openioc-scan/"/>
-    <updated>2014-10-24T18:09:24+09:00</updated>
+    <updated>2014-10-24T10:09:24+01:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2014/10/24/openioc-parameters-used-by-openioc-scan</id>
     <content type="html"><![CDATA[<p>&ldquo;Parameters&rdquo; introduced in OpenIOC 1.1 allows embedding additional metadata about Indicators into the IOC (in more detail, see <a href="https://media.blackhat.com/us-13/Arsenal/us-13-Gibb-IOCWriter_11-Slides.pdf">Blackhat 2013 presentation</a> by William Gibb). I implemented functions displaying matched content details and scoring results of indicator matching.</p>
 
@@ -52,7 +52,7 @@
   <entry>
     <title type="html"><![CDATA[Fast Malware Triage using openioc_scan Volatility Plugin]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/"/>
-    <updated>2014-08-15T15:36:26+09:00</updated>
+    <updated>2014-08-15T07:36:26+01:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin</id>
     <content type="html"><![CDATA[<p>Last year, I proposed &ldquo;volatile Indicators of Compromise (IOCs)&rdquo; based on RAM evidence only at <a href="http://digital-forensics.sans.org/summit-archives/DFIR_Summit/Volatile-IOCs-for-Fast-Incident-Response-Haruyama.pdf">SANS DFIR Summit</a>. We can detect malware using them faster than using disk-evidence-based IOCs. Besides, we can define indicators based on not only metadata (e.g., file path) but also malware function (e.g., code injection sign, imported functions and unpacked codes). The IOCs are described according to <a href="http://www.openioc.org/">OpenIOC</a> specification. <a href="http://www.mandiant.com/resources/download/ioc-editor/">IOC Editor</a> is used for defining IOCs and <a href="https://www.mandiant.com/resources/download/redline">Redline</a> is used for scannning IOCs.</p>
 
@@ -247,9 +247,9 @@
   
   <entry>
     <title type="html"><![CDATA[ID/IDAPython scripts extracting PlugX configs]]></title>
-    <link href="http://TakahiroHaruyama.github.io/blog/2014/03/27/id-slash-idapython-scripts-extracting-plugx-configs/"/>
-    <updated>2014-03-27T00:00:00+09:00</updated>
-    <id>http://TakahiroHaruyama.github.io/blog/2014/03/27/id-slash-idapython-scripts-extracting-plugx-configs</id>
+    <link href="http://TakahiroHaruyama.github.io/blog/2014/03/26/id-slash-idapython-scripts-extracting-plugx-configs/"/>
+    <updated>2014-03-26T15:00:00+00:00</updated>
+    <id>http://TakahiroHaruyama.github.io/blog/2014/03/26/id-slash-idapython-scripts-extracting-plugx-configs</id>
     <content type="html"><![CDATA[<p>I release Immunity Debugger and IDAPython scirpts dumping PlugX configs (and original PEs) then parsing them.</p>
 
 <!-- more -->

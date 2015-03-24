@@ -4,7 +4,7 @@
   <title><![CDATA[CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2015-02-27T15:28:14+09:00</updated>
+  <updated>2015-03-24T10:38:13+00:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -14,9 +14,18 @@
 
   
   <entry>
+    <title type="html"><![CDATA[DFRWS EU Slide Deck and Generic IOCs]]></title>
+    <link href="http://TakahiroHaruyama.github.io/blog/2015/03/24/dfrws-eu-slide-deck-and-generic-iocs/"/>
+    <updated>2015-03-24T09:55:22+00:00</updated>
+    <id>http://TakahiroHaruyama.github.io/blog/2015/03/24/dfrws-eu-slide-deck-and-generic-iocs</id>
+    <content type="html"><![CDATA[<p>My talk pdf <em>&ldquo;Fast and Generic Malware Triage Using openioc_scan Volatility Plugin&rdquo;</em> is uploaded to <a href="http://www.slideshare.net/takahiroharuyama5/dfrwseu2015">SlideShare</a>. The code and IOC examples is located in <a href="https://github.com/TakahiroHaruyama/openioc_scan">GitHub</a>. Please let me know if you have any question and request.</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[OpenIOC Parameters used by openioc_scan]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2014/10/24/openioc-parameters-used-by-openioc-scan/"/>
-    <updated>2014-10-24T18:09:24+09:00</updated>
+    <updated>2014-10-24T10:09:24+01:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2014/10/24/openioc-parameters-used-by-openioc-scan</id>
     <content type="html"><![CDATA[<p>&ldquo;Parameters&rdquo; introduced in OpenIOC 1.1 allows embedding additional metadata about Indicators into the IOC (in more detail, see <a href="https://media.blackhat.com/us-13/Arsenal/us-13-Gibb-IOCWriter_11-Slides.pdf">Blackhat 2013 presentation</a> by William Gibb). I implemented functions displaying matched content details and scoring results of indicator matching.</p>
 
@@ -52,7 +61,7 @@
   <entry>
     <title type="html"><![CDATA[Fast Malware Triage using openioc_scan Volatility Plugin]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/"/>
-    <updated>2014-08-15T15:36:26+09:00</updated>
+    <updated>2014-08-15T07:36:26+01:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin</id>
     <content type="html"><![CDATA[<p>Last year, I proposed &ldquo;volatile Indicators of Compromise (IOCs)&rdquo; based on RAM evidence only at <a href="http://digital-forensics.sans.org/summit-archives/DFIR_Summit/Volatile-IOCs-for-Fast-Incident-Response-Haruyama.pdf">SANS DFIR Summit</a>. We can detect malware using them faster than using disk-evidence-based IOCs. Besides, we can define indicators based on not only metadata (e.g., file path) but also malware function (e.g., code injection sign, imported functions and unpacked codes). The IOCs are described according to <a href="http://www.openioc.org/">OpenIOC</a> specification. <a href="http://www.mandiant.com/resources/download/ioc-editor/">IOC Editor</a> is used for defining IOCs and <a href="https://www.mandiant.com/resources/download/redline">Redline</a> is used for scannning IOCs.</p>
 
@@ -229,7 +238,7 @@
   <entry>
     <title type="html"><![CDATA[Memory Forensics: still aborted]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2014/04/21/memory-forensics-still-aborted/"/>
-    <updated>2014-04-21T19:34:48+09:00</updated>
+    <updated>2014-04-21T11:34:48+01:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2014/04/21/memory-forensics-still-aborted</id>
     <content type="html"><![CDATA[<p>2 years ago, I talked about the anti memory forensic method by modifying Windows kernel data structure on victim systems at <a href="http://www.blackhat.com/html/bh-eu-12/bh-eu-12-archives.html#haruyama">BlackHat Europe 2012</a>. The situation is still the same.</p>
 
@@ -262,9 +271,9 @@ Volatility Framework already support the options. In that sense, Volatility is b
   
   <entry>
     <title type="html"><![CDATA[ID/IDAPython scripts extracting PlugX configs]]></title>
-    <link href="http://TakahiroHaruyama.github.io/blog/2014/03/27/id-slash-idapython-scripts-extracting-plugx-configs/"/>
-    <updated>2014-03-27T00:00:00+09:00</updated>
-    <id>http://TakahiroHaruyama.github.io/blog/2014/03/27/id-slash-idapython-scripts-extracting-plugx-configs</id>
+    <link href="http://TakahiroHaruyama.github.io/blog/2014/03/26/id-slash-idapython-scripts-extracting-plugx-configs/"/>
+    <updated>2014-03-26T15:00:00+00:00</updated>
+    <id>http://TakahiroHaruyama.github.io/blog/2014/03/26/id-slash-idapython-scripts-extracting-plugx-configs</id>
     <content type="html"><![CDATA[<p>I release Immunity Debugger and IDAPython scirpts dumping PlugX configs (and original PEs) then parsing them.</p>
 
 <!-- more -->
@@ -324,7 +333,7 @@ The Immunity Debugger script can be used for PlugX type I&amp;II. The IDAPython 
   <entry>
     <title type="html"><![CDATA[PlugX Builder/Controller (Type III, 0x840)]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2014/03/12/plugx-builder-slash-controller/"/>
-    <updated>2014-03-12T19:44:27+09:00</updated>
+    <updated>2014-03-12T10:44:27+00:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2014/03/12/plugx-builder-slash-controller</id>
     <content type="html"><![CDATA[<p>Recently, I acquired a PlugX builder/controller. This seems to be the same as the one referred in <a href="http://image.ahnlab.com/global/upload/download/documents/1401223631603288.pdf">AhnLab&rsquo;s APT attacks analysis report</a>, judging from the GUI window. I tried to use it.</p>
 
@@ -398,7 +407,7 @@ MD5=b4d8bfb56accbd17514bffc1fa8e1953</p>
   <entry>
     <title type="html"><![CDATA[64bit big sized RAM Image Acquisition Problem]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2014/01/07/64bit-big-size-ram-acquisition-problem/"/>
-    <updated>2014-01-07T22:15:39+09:00</updated>
+    <updated>2014-01-07T13:15:39+00:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2014/01/07/64bit-big-size-ram-acquisition-problem</id>
     <content type="html"><![CDATA[<h3>The Problem</h3>
 
@@ -514,7 +523,7 @@ MD5=b4d8bfb56accbd17514bffc1fa8e1953</p>
   <entry>
     <title type="html"><![CDATA[Some Old Stuffs]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2014/01/05/some-old-stuffs/"/>
-    <updated>2014-01-05T23:37:20+09:00</updated>
+    <updated>2014-01-05T14:37:20+00:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2014/01/05/some-old-stuffs</id>
     <content type="html"><![CDATA[<h3>IOCs for memory forensics</h3>
 
