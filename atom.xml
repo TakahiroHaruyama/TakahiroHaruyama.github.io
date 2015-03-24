@@ -4,7 +4,7 @@
   <title><![CDATA[CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2015-03-24T10:38:13+00:00</updated>
+  <updated>2015-03-24T10:40:21+00:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -18,7 +18,7 @@
     <link href="http://TakahiroHaruyama.github.io/blog/2015/03/24/dfrws-eu-slide-deck-and-generic-iocs/"/>
     <updated>2015-03-24T09:55:22+00:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2015/03/24/dfrws-eu-slide-deck-and-generic-iocs</id>
-    <content type="html"><![CDATA[<p>My talk pdf <em>&ldquo;Fast and Generic Malware Triage Using openioc_scan Volatility Plugin&rdquo;</em> is uploaded to <a href="http://www.slideshare.net/takahiroharuyama5/dfrwseu2015">SlideShare</a>. The code and IOC examples is located in <a href="https://github.com/TakahiroHaruyama/openioc_scan">GitHub</a>. Please let me know if you have any question and request.</p>
+    <content type="html"><![CDATA[<p>My talk pdf <em>&ldquo;Fast and Generic Malware Triage Using openioc_scan Volatility Plugin&rdquo;</em> is uploaded to <a href="http://www.slideshare.net/takahiroharuyama5/dfrwseu2015">SlideShare</a>. The code and IOC examples are located in <a href="https://github.com/TakahiroHaruyama/openioc_scan">GitHub</a>. Please let me know if you have any question and request.</p>
 ]]></content>
   </entry>
   
