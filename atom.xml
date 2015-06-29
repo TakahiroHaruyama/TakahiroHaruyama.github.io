@@ -4,7 +4,7 @@
   <title><![CDATA[CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2015-04-01T16:32:46+09:00</updated>
+  <updated>2015-06-29T11:20:16+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -123,9 +123,9 @@
 
 <p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_scan/2nd_run.jpg" alt="2nd_run" /></p>
 
-<h3>Supported Terms (2015/2/26)</h3>
+<h3>Supported Terms (2015/6/29)</h3>
 
-<p>I show 36 terms supported by openioc_scan. <del>To make maximal use of openioc_scan, we had better newly add some term definitions in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide). </del>  <del><strong>(2014/8/25)</strong> We can add new definitions on PyIOCe from Terms->Indicator Terms menu as follows:</del> <strong>(2014/9/30)</strong> Sean added term import/export functions to PyIOCe. You can import <a href="http://TakahiroHaruyama.github.io/downloads/scripts/indicator_terms.volatility">the terms for Volatility</a> or PyIOCe with all Volatility terms may be released shortly. Thanks Sean!</p>
+<p>I show 35 terms supported by openioc_scan. <del>To make maximal use of openioc_scan, we had better newly add some term definitions in Configuration\IOCTerms*.iocterms file of IOC Editor installed folder (for more detail, see IOCe user guide). </del>  <del><strong>(2014/8/25)</strong> We can add new definitions on PyIOCe from Terms->Indicator Terms menu as follows:</del> <strong>(2014/9/30)</strong> Sean added term import/export functions to PyIOCe. You can import the terms for Volatility (download from github) or PyIOCe with all Volatility terms may be released shortly. Thanks Sean!</p>
 
 <p><img src="http://TakahiroHaruyama.github.io/images/post/openioc_scan/new_terms.jpg" alt="new_terms" /></p>
 
@@ -155,7 +155,7 @@
 <h4>RegistryItem (2 Terms)</h4>
 
 <ul>
-<li><strong>RegistryItem/Path (string)</strong> &hellip; registry key or value paths based on <em>hivelist&amp;printkey</em>. It&rsquo;s too slow, so I recommend to use handle names instead. For example, it takes 12 hours in 512MB RAM :&ndash;(</li>
+<li><strong><del>RegistryItem/Path (string)</del></strong> &hellip; <del>registry key or value paths based on <em>hivelist&amp;printkey</em>. It&rsquo;s too slow, so I recommend to use handle names instead. For example, it takes 12 hours in 512MB RAM :&ndash;(</del> (disabled)</li>
 <li><strong>RegistryItem/ShimCache/ExecutablePath (string)</strong> &hellip; exe/dll/bat file paths included in <em>shimcache</em> artifact</li>
 </ul>
 
@@ -225,7 +225,7 @@
 
 <p>Any comments or feedback are welcome.</p>
 
-<h3>Download (latest:2015/2/18)</h3>
+<h3>Download</h3>
 
 <p>I made the <a href="https://github.com/TakahiroHaruyama/openioc_scan">repository for openioc_scan</a>. you can download the code, example IOCs and PyIOCe volatility terms/parameters from there.</p>
 
