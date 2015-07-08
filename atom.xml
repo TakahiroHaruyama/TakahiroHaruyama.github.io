@@ -4,7 +4,7 @@
   <title><![CDATA[CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2015-07-03T11:01:37+09:00</updated>
+  <updated>2015-07-08T12:24:26+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -12,6 +12,28 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Remote Malware Triage Automation]]></title>
+    <link href="http://TakahiroHaruyama.github.io/blog/2015/07/03/remote-malware-triage-automation/"/>
+    <updated>2015-07-03T11:06:53+09:00</updated>
+    <id>http://TakahiroHaruyama.github.io/blog/2015/07/03/remote-malware-triage-automation</id>
+    <content type="html"><![CDATA[<p>I published the script automating remote malware triage with F-Response and openioc_scan.</p>
+
+<!-- more -->
+
+
+<p>F-Response provides read-only access to the full physical disk(s) of any networked computer. Additionally the physical memory (RAM) of most Microsoft Windows systems can be mounted. We can automate RAM acquisition from remote machine and IOC scan using F-Response COM API. I show the flow of the script.</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/onigiri/onigiri.png" alt="flow" /></p>
+
+<p>The script supports not only a RAM acquisition but also an acuqisition including files with unallocated status (sysreg,userreg,mft,prefetch,evtx,amcache,journal).</p>
+
+<p>We need several preparations (e.g., 3rd party python packages, F-Response configuration, FW rule change) to run the script. For details, check <a href="https://github.com/TakahiroHaruyama/onigiri">the github page</a>. Let me know if any problem, request and bug.</p>
+
+<p><img src="http://TakahiroHaruyama.github.io/images/post/onigiri/onigiri_demo2.png" alt="demo" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[DFRWS EU Slide Deck and Generic IOCs]]></title>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Forensics | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/forensics/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2015-07-03T11:01:37+09:00</updated>
+  <updated>2015-07-08T12:24:26+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -12,6 +12,28 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Remote Malware Triage Automation]]></title>
+    <link href="http://TakahiroHaruyama.github.io/blog/2015/07/03/remote-malware-triage-automation/"/>
+    <updated>2015-07-03T11:06:53+09:00</updated>
+    <id>http://TakahiroHaruyama.github.io/blog/2015/07/03/remote-malware-triage-automation</id>
+    <content type="html"><![CDATA[<p>I published the script automating remote malware triage with F-Response and openioc_scan.</p>
+
+<!-- more -->
+
+
+<p>F-Response provides read-only access to the full physical disk(s) of any networked computer. Additionally the physical memory (RAM) of most Microsoft Windows systems can be mounted. We can automate RAM acquisition from remote machine and IOC scan using F-Response COM API. I show the flow of the script.</p>
+
+<p><img src="/images/post/onigiri/onigiri.png" alt="flow" /></p>
+
+<p>The script supports not only a RAM acquisition but also an acuqisition including files with unallocated status (sysreg,userreg,mft,prefetch,evtx,amcache,journal).</p>
+
+<p>We need several preparations (e.g., 3rd party python packages, F-Response configuration, FW rule change) to run the script. For details, check <a href="https://github.com/TakahiroHaruyama/onigiri">the github page</a>. Let me know if any problem, request and bug.</p>
+
+<p><img src="/images/post/onigiri/onigiri_demo2.png" alt="demo" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[DFRWS EU Slide Deck and Generic IOCs]]></title>
@@ -285,133 +307,6 @@
 Volatility Framework already support the options. In that sense, Volatility is better than Redline.</p>
 
 <p>On the other hand, Redline (Memoryze) is better than Volatility in terms of the kernel object listing (e.g., pslist command) because it doesn&rsquo;t depend on debug data structure like _DBGKD_DEBUG_DATA_HEADER64. However, Volatility users can use psscan instead of pslist. Therefore, it may be nothing more than a trivial risk.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[64bit big sized RAM Image Acquisition Problem]]></title>
-    <link href="http://TakahiroHaruyama.github.io/blog/2014/01/07/64bit-big-size-ram-acquisition-problem/"/>
-    <updated>2014-01-07T22:15:39+09:00</updated>
-    <id>http://TakahiroHaruyama.github.io/blog/2014/01/07/64bit-big-size-ram-acquisition-problem</id>
-    <content type="html"><![CDATA[<h3>The Problem</h3>
-
-<p>One day, I acquired a 16GB raw memory image on Windows7 x64 machine using MoonSols DumpIt for malware investigation. Then I tried to analyze it using Volatility Framework and Redline, but they returned no output like this:</p>
-
-<p><img src="/images/post/vol_no_result.jpg" alt="vol_no_result" /></p>
-
-<p>I guessed the acquired image was corrupted, so I took an image again, but the result was the same. I googled about the problem and found <a href="https://code.google.com/p/volatility/issues/detail?id=412">a similar issue</a>. According to the report, I tested several memory acquisition tools such as FTK Imager and Windows Memory Reader, but they didn&rsquo;t work.</p>
-
-<p>I changed an image format from raw to crashdump. Then Volatility Framework could parse it and display the result. Strangely, Volatility also could analyze the raw image converted from the crashdump. Where does this difference come from?</p>
-
-<!-- more -->
-
-
-<h3>The Cause</h3>
-
-<p>I debugged Volatility and noticed it could not find _KDDEBUGGER_DATA64 structure.</p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;/p>
-</span><span class='line'>
-</span><span class='line'>&lt;p>def get_kdbg(addr_space):&lt;/p>
-</span><span class='line'>
-</span><span class='line'>&lt;pre>&lt;code>"""A function designed to return the KDBG structure from 
-</span><span class='line'>an address space. First we try scanning for KDBG and if 
-</span><span class='line'>that fails, we try scanning for KPCR and bouncing back to
-</span><span class='line'>KDBG from there. 
-</span><span class='line'>
-</span><span class='line'>Also note, both the primary and backup methods rely on the 
-</span><span class='line'>4-byte KDBG.Header.OwnerTag. If someone overwrites this 
-</span><span class='line'>value, then neither method will succeed. The same is true 
-</span><span class='line'>even if a user specifies --kdbg, because we check for the 
-</span><span class='line'>OwnerTag even in that case. 
-</span><span class='line'>"""
-</span><span class='line'>
-</span><span class='line'>kdbgo = obj.VolMagic(addr_space).KDBG.v()
-</span><span class='line'>
-</span><span class='line'>kdbg = obj.Object("\_KDDEBUGGER_DATA64", offset = kdbgo, vm = addr_space) 
-</span><span class='line'>
-</span><span class='line'>if kdbg.is_valid(): # &lt;- failed
-</span><span class='line'>    return kdbg
-</span><span class='line'>
-</span><span class='line'># Fall back to finding it via the KPCR. We cannot
-</span><span class='line'># accept the first/best suggestion, because only 
-</span><span class='line'># the KPCR for the first CPU allows us to find KDBG. 
-</span><span class='line'>for kpcr_off in obj.VolMagic(addr_space).KPCR.generate_suggestions():
-</span><span class='line'>
-</span><span class='line'>    kpcr = obj.Object("_KPCR", offset = kpcr_off, vm = addr_space)
-</span><span class='line'>
-</span><span class='line'>    kdbg = kpcr.get_kdbg() 
-</span><span class='line'>
-</span><span class='line'>    if kdbg.is_valid(): # &lt;- failed
-</span><span class='line'>        return kdbg
-</span><span class='line'>
-</span><span class='line'>return obj.NoneObject("KDDEBUGGER structure not found using either KDBG signature or KPCR pointer")
-</span><span class='line'>&lt;/code>&lt;/pre>
-</span><span class='line'>
-</span><span class='line'>&lt;p></span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>_KDDEBUGGER_DATA64 includes various debug information like PsLoadedModuleList. Matthieu Suiche at MoonSols told me Vista or later Windows OSes on x64 machines encrypt the structure. So I compared a simply-dumped raw image with a raw image converted from crashdump.</p>
-
-<p><img src="/images/post/DBGKD_DEBUG_DATA_HEADER64.jpg" alt="kdbg_encrypted" /></p>
-
-<p>DBGKD_DEBUG_DATA_HEADER64 in _KDDEBUGGER_DATA64 is highlighted. Surely, it seems to be encoded by a specific algorithm. I think there is a few people knowing the fact because <strong>the encryption is only applied to big size RAM</strong> (if not correct, please let me know). For instance, I checked _KDDEBUGGER_DATA64 in 1GB raw image was not encrypted and analysis tools worked fine.</p>
-
-<h3>Which acquisition tools should we use?</h3>
-
-<p>Matthieu said DumpIt implemented the decryption of _KDDEBUGGER_DATA64 structure for crashdump format only. I investigated whether acquisition tools including DumpIt can decrypt the structure. I showed the result in the folowing table.</p>
-
-<p><img src="/images/post/acquisition_tools_result.png" alt="acquisition_tools_result" /></p>
-
-<p>The result means the only option is to take crashdump using DumpIt. Any other tools don&rsquo;t decrypt. So, why DumpIt can decrypt the structure? I reverse-engineered the driver code and found it used KdSystemDebugControl to get _DBGKD_GET_VERSION64 and _KDDEBUGGER_DATA64, then made its crashdump header (1st page in .dmp) manually by inserting _KDDEBUGGER_DATA64 member values, but I couldn&rsquo;t find the decryption routine by static code analysis. The local debugging API is related to the decryption? not sure.</p>
-
-<p><img src="/images/post/KdSystemDebugControl.jpg" alt="KdSystemDebugControl" /></p>
-
-<h3>Just for the record,</h3>
-
-<p>64-bit crashdump images generated by Windows Memory Reader and winpmem couldn&rsquo;t be analyzed by my EnScript, CrashDumpAnalyzer. I cannot understand the error because my EnScript reads debug information from the 1st header, so the EnScript is due to parse it even if _KDDEBUGGER_DATA64 structure is encrypted. I checked the 1st page.</p>
-
-<p><img src="/images/post/NumberOfRuns.jpg" alt="1st_header" /></p>
-
-<p>In a crashdump acquired by winpmem, NumberOfRuns of _PHYSICAL_MEMORY_DESCRIPTOR64 includes &ldquo;PAGE&rdquo; (this value should be defined as qword, correct?). That&rsquo;s why the script fails in parsing the structure. I modified NumberOfRuns then could get the analysis result.</p>
 ]]></content>
   </entry>
   
