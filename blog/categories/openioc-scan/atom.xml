@@ -4,7 +4,7 @@
   <title><![CDATA[Category: openioc_scan | CCI]]></title>
   <link href="http://TakahiroHaruyama.github.io/blog/categories/openioc-scan/atom.xml" rel="self"/>
   <link href="http://TakahiroHaruyama.github.io/"/>
-  <updated>2015-10-15T11:00:07+02:00</updated>
+  <updated>2015-12-04T15:39:04+09:00</updated>
   <id>http://TakahiroHaruyama.github.io/</id>
   <author>
     <name><![CDATA[Takahiro Haruyama (@cci_forensics)]]></name>
@@ -16,16 +16,16 @@
   <entry>
     <title type="html"><![CDATA[Presentation at SECURE 2015]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2015/10/15/presentation-at-secure-2015/"/>
-    <updated>2015-10-15T10:45:58+02:00</updated>
+    <updated>2015-10-15T17:45:58+09:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2015/10/15/presentation-at-secure-2015</id>
-    <content type="html"><![CDATA[<p>The Presentation file is <a href="http://www.slideshare.net/takahiroharuyama5/openiocscan-ioc-scanner-for-memory-forensics">here</a>. The content will be helpful if you use openioc_scan and onigiri.</p>
+    <content type="html"><![CDATA[<p>The Presentation file is <a href="http://www.secure.edu.pl/pdf/2015/D1_1730_A_Haruyama.pdf">here</a>. The content will be helpful if you use openioc_scan and onigiri.</p>
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[Remote Malware Triage Automation]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2015/07/03/remote-malware-triage-automation/"/>
-    <updated>2015-07-03T04:06:53+02:00</updated>
+    <updated>2015-07-03T11:06:53+09:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2015/07/03/remote-malware-triage-automation</id>
     <content type="html"><![CDATA[<p>I published the script automating remote malware triage with F-Response and openioc_scan.</p>
 
@@ -47,7 +47,7 @@
   <entry>
     <title type="html"><![CDATA[DFRWS EU Slide Deck and Generic IOCs]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2015/03/24/dfrws-eu-slide-deck-and-generic-iocs/"/>
-    <updated>2015-03-24T10:55:22+01:00</updated>
+    <updated>2015-03-24T18:55:22+09:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2015/03/24/dfrws-eu-slide-deck-and-generic-iocs</id>
     <content type="html"><![CDATA[<p>My talk pdf <em>&ldquo;Fast and Generic Malware Triage Using openioc_scan Volatility Plugin&rdquo;</em> is uploaded to <a href="http://www.slideshare.net/takahiroharuyama5/dfrwseu2015">SlideShare</a>. The code and IOC examples are located in <a href="https://github.com/TakahiroHaruyama/openioc_scan">GitHub</a>. Please let me know if you have any question and request.</p>
 ]]></content>
@@ -56,7 +56,7 @@
   <entry>
     <title type="html"><![CDATA[OpenIOC Parameters used by openioc_scan]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2014/10/24/openioc-parameters-used-by-openioc-scan/"/>
-    <updated>2014-10-24T11:09:24+02:00</updated>
+    <updated>2014-10-24T18:09:24+09:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2014/10/24/openioc-parameters-used-by-openioc-scan</id>
     <content type="html"><![CDATA[<p>&ldquo;Parameters&rdquo; introduced in OpenIOC 1.1 allows embedding additional metadata about Indicators into the IOC (in more detail, see <a href="https://media.blackhat.com/us-13/Arsenal/us-13-Gibb-IOCWriter_11-Slides.pdf">Blackhat 2013 presentation</a> by William Gibb). I implemented functions displaying matched content details and scoring results of indicator matching.</p>
 
@@ -92,7 +92,7 @@
   <entry>
     <title type="html"><![CDATA[Fast Malware Triage using openioc_scan Volatility Plugin]]></title>
     <link href="http://TakahiroHaruyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin/"/>
-    <updated>2014-08-15T08:36:26+02:00</updated>
+    <updated>2014-08-15T15:36:26+09:00</updated>
     <id>http://TakahiroHaruyama.github.io/blog/2014/08/15/fast-malware-triage-using-openioc-scan-volatility-plugin</id>
     <content type="html"><![CDATA[<p>Last year, I proposed &ldquo;volatile Indicators of Compromise (IOCs)&rdquo; based on RAM evidence only at <a href="http://digital-forensics.sans.org/summit-archives/DFIR_Summit/Volatile-IOCs-for-Fast-Incident-Response-Haruyama.pdf">SANS DFIR Summit</a>. We can detect malware using them faster than using disk-evidence-based IOCs. Besides, we can define indicators based on not only metadata (e.g., file path) but also malware function (e.g., code injection sign, imported functions and unpacked codes). The IOCs are described according to <a href="http://www.openioc.org/">OpenIOC</a> specification. <a href="http://www.mandiant.com/resources/download/ioc-editor/">IOC Editor</a> is used for defining IOCs and <a href="https://www.mandiant.com/resources/download/redline">Redline</a> is used for scannning IOCs.</p>
 
